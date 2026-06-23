@@ -25,9 +25,14 @@ if (engine.includes('</script>')) {
   throw new Error('engine.js contains a literal </script>; cannot inline safely');
 }
 
+// NOTE: use function replacements so `$`-sequences inside engine.js (e.g. the
+// `'\\$&'` in _escapeRegex) are inserted literally and NOT interpreted as
+// special String.replace patterns ($&, $1, ...). A string replacement here
+// would expand `$&` to the matched <script> tag and inject a stray </script>,
+// closing the tag early and dumping the rest of the code as visible text.
 let html = template
-  .replace(SCRIPT_TAG, `<script>\n${engine}\n</script>`)
-  .replace(PLACEHOLDER, ''); // no client-side key → uses /api/extract
+  .replace(SCRIPT_TAG, () => `<script>\n${engine}\n</script>`)
+  .replace(PLACEHOLDER, () => ''); // no client-side key → uses /api/extract
 
 mkdirSync('dist', { recursive: true });
 writeFileSync('dist/index.html', html);
