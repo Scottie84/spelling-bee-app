@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm install --omit=dev",
+  "buildCommand": "node build_vercel.mjs",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/extract.js": { "maxDuration": 60 }
+  }
+}

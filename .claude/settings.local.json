@@ -19,7 +19,8 @@
       "Bash(npm i *)",
       "Bash(npx playwright *)",
       "Bash(node *)",
-      "PowerShell(Get-ChildItem C:\\\\dev\\\\spellingbee -File | Select-Object Name,Length | Format-Table -AutoSize; \"lock lines:\"; \\(Get-Content C:\\\\dev\\\\spellingbee\\\\package-lock.json | Measure-Object -Line\\).Lines)"
+      "PowerShell(Get-ChildItem C:\\\\dev\\\\spellingbee -File | Select-Object Name,Length | Format-Table -AutoSize; \"lock lines:\"; \\(Get-Content C:\\\\dev\\\\spellingbee\\\\package-lock.json | Measure-Object -Line\\).Lines)",
+      "mcp__github__get_file_contents"
     ]
   }
 }

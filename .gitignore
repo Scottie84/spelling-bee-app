@@ -17,6 +17,10 @@ env/
 # Node
 node_modules/
 
+# Vercel build output
+dist/
+.vercel/
+
 # Test artifacts / screenshots
 shot-home.png
 shot-quiz.png

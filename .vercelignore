@@ -1,0 +1,14 @@
+# Dev-only Python tooling — keep Vercel from auto-detecting a Python project
+*.py
+requirements.txt
+.env
+.env.*
+
+# Tests & local screenshots (not needed to build/deploy)
+*.test.mjs
+shot.mjs
+shot-*.png
+test_vocab.png
+
+# Agent/editor config
+.claude

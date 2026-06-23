@@ -375,14 +375,19 @@
    * @returns {Promise<{words: PartialWord[], modelUsed: string, raw?: string}>}
    */
   async function extractWordsFromImage(dataUrlOrBase64, opts = {}) {
-    if (!_apiKey) throw new Error('[SnapEngine] API key not set. Call SnapEngine.setApiKey(key) first.');
-
     const maxTokens = opts.maxTokens || 1200;
 
     // Normalise to a proper data URI so the model gets a valid image_url
     let imageUrl = dataUrlOrBase64;
     if (!imageUrl.startsWith('data:')) {
       imageUrl = `data:image/png;base64,${imageUrl}`;
+    }
+
+    // No client-side key configured → call the serverless proxy so the key
+    // stays on the server (e.g. Vercel env var). The local single-file build
+    // (build.py) embeds a key and keeps calling OpenRouter directly below.
+    if (!_apiKey) {
+      return _extractViaServer(imageUrl, maxTokens);
     }
 
     const systemPrompt = `You are a vocabulary extraction assistant for children's English word books.
@@ -466,6 +471,37 @@ If there are no vocabulary words in the image, return an empty array: []`;
     }
 
     throw new Error(`[SnapEngine] extractWordsFromImage: all models failed.\n${errors.join('\n')}`);
+  }
+
+  /**
+   * Server-side extraction path (no key on the client).
+   * POSTs the image to /api/extract, which holds OPENROUTER_API_KEY in its env.
+   * @returns {Promise<{words: PartialWord[], modelUsed: string}>}
+   */
+  async function _extractViaServer(imageUrl, maxTokens) {
+    const endpoint = (global.SNAP_CONFIG && global.SNAP_CONFIG.apiBase) || '/api/extract';
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: imageUrl, maxTokens }),
+      });
+      clearTimeout(timer);
+      if (!resp.ok) {
+        const body = await resp.text().catch(() => '');
+        throw new Error(`서버 추출 실패 (HTTP ${resp.status}): ${body.slice(0, 200)}`);
+      }
+      const json = await resp.json();
+      if (json.error) throw new Error(json.error);
+      return { words: json.words || [], modelUsed: json.modelUsed || 'server' };
+    } catch (err) {
+      clearTimeout(timer);
+      if (err.name === 'AbortError') throw new Error('서버 응답 시간 초과 (60초)');
+      throw err;
+    }
   }
 
   /**
