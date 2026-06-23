@@ -8,7 +8,7 @@
 ## 주요 기능
 
 - 📷 **사진 → 단어 자동 등록**: OpenRouter 비전 모델로 단어·뜻·예문·유의어/반의어 추출
-- 📚 **단어장 누적 저장**: IndexedDB(미지원 시 localStorage) 기반, 그룹별 관리
+- 📚 **단어장 누적 저장**: Supabase(`english_words` 테이블) 우선, 미설정 시 IndexedDB/localStorage 폴백, 그룹별 관리
 - 🎮 **4지선다 퀴즈**: 뜻↔단어, 빈칸 채우기, 유의어/반의어 (유형 자동 혼합)
 - 🔁 **복습 모드**: 틀린 단어 자동 추적, 복습만 풀기
 - 📤 **내보내기/가져오기**: 단어장 JSON 백업
@@ -18,7 +18,7 @@
 
 | 파일 | 설명 |
 |---|---|
-| `engine.js` | 클라이언트 엔진 — 저장소·퀴즈 생성·채점·이미지 추출 (브라우저/Node 공용) |
+| `engine.js` | 클라이언트 엔진 — 저장소(Supabase/IndexedDB/localStorage)·퀴즈 생성·채점·이미지 추출 (브라우저/Node 공용) |
 | `index.template.html` | 단일 페이지 UI 템플릿 (`__OPENROUTER_API_KEY__` 플레이스홀더 포함) |
 | `build.py` | 템플릿 + 엔진 + API 키를 인라인해 `index.html` 빌드 |
 | `config.py` / `openrouter_client.py` | Python용 OpenRouter 설정·클라이언트 (스모크 테스트) |
@@ -38,6 +38,24 @@ python build.py
 
 > ⚠️ `index.html`은 API 키를 포함하므로 git에 커밋되지 않습니다(`.gitignore`).
 > 키는 오직 `.env` 에만 두고, 절대 코드/저장소에 하드코딩하지 마세요.
+
+## 데이터 저장 (Supabase)
+
+단어장은 Supabase의 `english_words` 테이블에 저장됩니다. `.env`(로컬) 또는 Vercel
+환경변수에 `SUPABASE_URL`과 `SUPABASE_ANON_KEY`(publishable/anon 키)를 설정하면
+`engine.js`가 자동으로 Supabase를 저장소로 사용합니다. 두 값은 공개되어도 안전하며
+(데이터는 Row Level Security로 보호), 미설정 시 IndexedDB/localStorage로 폴백합니다.
+
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| `id` | text (PK) | 클라이언트 생성 ID (`w_xxxxxx`) |
+| `word` / `pos` / `meaning` / `example` / `syn` / `ant` | text | 단어 데이터 |
+| `group_name` | text | 그룹 이름 |
+| `added_at` | timestamptz | 추가 시각 |
+| `stats` | jsonb | `{ seen, correct, wrong }` |
+
+> 이 앱은 로그인 기능이 없어 anon 키에 전체 읽기/쓰기 권한을 부여하는 RLS 정책을
+> 사용합니다(기존 테이블과 동일한 신뢰 모델). 인증이 필요하면 정책을 강화하세요.
 
 ## 테스트
 

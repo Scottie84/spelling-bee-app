@@ -47,9 +47,16 @@
 
   let _apiKey  = (global.SNAP_CONFIG && global.SNAP_CONFIG.apiKey) || '';
   let _db      = null;   // IDBDatabase | null
+  let _useSB   = false;  // true when a Supabase project is configured
   let _useIDB  = false;  // true when IndexedDB is available and opened
   let _useLST  = false;  // true when falling back to localStorage
   let _memStore = null;  // Map<id, Word> | null — used in Node / no-storage env
+
+  // Supabase (PostgREST) config — public project URL + publishable/anon key.
+  // Safe to ship to the browser; the database is protected by RLS policies.
+  const _sbUrl = (global.SNAP_CONFIG && global.SNAP_CONFIG.supabaseUrl) || '';
+  const _sbKey = (global.SNAP_CONFIG && global.SNAP_CONFIG.supabaseKey) || '';
+  const SB_TABLE = 'english_words';
 
   // ---------------------------------------------------------------------------
   // Utility helpers
@@ -174,18 +181,106 @@
     });
   }
 
+  // --- Supabase (PostgREST REST API) ---
+
+  /** Map a DB row (snake_case) to the in-app Word shape. */
+  function _sbRowToWord(row) {
+    return {
+      id:      row.id,
+      word:    row.word    || '',
+      pos:     row.pos     || '',
+      meaning: row.meaning || '',
+      example: row.example || '',
+      syn:     row.syn     || '',
+      ant:     row.ant     || '',
+      group:   row.group_name || '',
+      addedAt: row.added_at    || '',
+      stats:   row.stats || { seen: 0, correct: 0, wrong: 0 },
+    };
+  }
+
+  /** Map an in-app Word to a DB row (snake_case). */
+  function _sbWordToRow(word) {
+    return {
+      id:         word.id,
+      word:       word.word    || '',
+      pos:        word.pos     || '',
+      meaning:    word.meaning || '',
+      example:    word.example || '',
+      syn:        word.syn     || '',
+      ant:        word.ant     || '',
+      group_name: word.group   || '',
+      added_at:   word.addedAt || new Date().toISOString(),
+      stats:      word.stats   || { seen: 0, correct: 0, wrong: 0 },
+    };
+  }
+
+  async function _sbFetch(path, options = {}) {
+    const resp = await fetch(`${_sbUrl}/rest/v1/${path}`, {
+      ...options,
+      headers: {
+        'apikey':        _sbKey,
+        'Authorization': `Bearer ${_sbKey}`,
+        'Content-Type':  'application/json',
+        ...(options.headers || {}),
+      },
+    });
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => '');
+      throw new Error(`[SnapEngine] Supabase ${resp.status}: ${body.slice(0, 200)}`);
+    }
+    return resp;
+  }
+
+  async function _sbGetAll() {
+    const resp = await _sbFetch(`${SB_TABLE}?select=*`);
+    const rows = await resp.json();
+    return Array.isArray(rows) ? rows.map(_sbRowToWord) : [];
+  }
+
+  async function _sbPut(word) {
+    // Upsert on the primary key so add/update share one path.
+    await _sbFetch(SB_TABLE, {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(_sbWordToRow(word)),
+    });
+  }
+
+  async function _sbDelete(id) {
+    await _sbFetch(`${SB_TABLE}?id=eq.${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: { 'Prefer': 'return=minimal' },
+    });
+  }
+
+  async function _sbClear() {
+    // PostgREST requires a filter for DELETE; match every row.
+    await _sbFetch(`${SB_TABLE}?id=not.is.null`, {
+      method: 'DELETE',
+      headers: { 'Prefer': 'return=minimal' },
+    });
+  }
+
   // --- Dispatch to the active backend ---
 
-  async function _getAll()     { if (_useIDB) return _idbGetAll(); if (_useLST) return _lstGetAll(); return _memGetAll(); }
-  async function _put(word)    { if (_useIDB) return _idbPut(word); if (_useLST) return _lstPut(word); return _memPut(word); }
-  async function _del(id)      { if (_useIDB) return _idbDelete(id); if (_useLST) return _lstDelete(id); return _memDelete(id); }
-  async function _clearStore() { if (_useIDB) return _idbClear(); if (_useLST) return _lstClear(); return _memClear(); }
+  async function _getAll()     { if (_useSB) return _sbGetAll(); if (_useIDB) return _idbGetAll(); if (_useLST) return _lstGetAll(); return _memGetAll(); }
+  async function _put(word)    { if (_useSB) return _sbPut(word); if (_useIDB) return _idbPut(word); if (_useLST) return _lstPut(word); return _memPut(word); }
+  async function _del(id)      { if (_useSB) return _sbDelete(id); if (_useIDB) return _idbDelete(id); if (_useLST) return _lstDelete(id); return _memDelete(id); }
+  async function _clearStore() { if (_useSB) return _sbClear(); if (_useIDB) return _idbClear(); if (_useLST) return _lstClear(); return _memClear(); }
 
   // ---------------------------------------------------------------------------
   // init() — opens the right storage backend
   // ---------------------------------------------------------------------------
 
   async function init() {
+    // Supabase configured → use it as the source of truth (works in both
+    // browser and Node, as long as fetch is available).
+    if (_sbUrl && _sbKey && typeof fetch !== 'undefined') {
+      _useSB = true;
+      return;
+    }
+
     // Node environment (no indexedDB global) → in-memory
     if (typeof indexedDB === 'undefined') {
       _memInit();

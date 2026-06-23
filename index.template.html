@@ -6,8 +6,14 @@
   <meta name="theme-color" content="#6C63FF" />
   <title>SnapQuiz — 영단어 퀴즈</title>
 
-  <!-- Engine config — build step replaces the placeholder with the real key -->
-  <script>window.SNAP_CONFIG = { apiKey: "__OPENROUTER_API_KEY__" };</script>
+  <!-- Engine config — build step replaces the placeholders with real values.
+       The Supabase URL + publishable key are public (RLS protects the data),
+       so they ship to the browser; the OpenRouter key does not. -->
+  <script>window.SNAP_CONFIG = {
+    apiKey:      "__OPENROUTER_API_KEY__",
+    supabaseUrl: "__SUPABASE_URL__",
+    supabaseKey: "__SUPABASE_ANON_KEY__"
+  };</script>
   <script src="engine.js"></script>
 
   <style>

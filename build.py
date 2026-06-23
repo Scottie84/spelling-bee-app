@@ -23,21 +23,33 @@ OUT = ROOT / "index.html"
 ENV = ROOT / ".env"
 
 PLACEHOLDER = "__OPENROUTER_API_KEY__"
+SB_URL_PLACEHOLDER = "__SUPABASE_URL__"
+SB_KEY_PLACEHOLDER = "__SUPABASE_ANON_KEY__"
 SCRIPT_TAG = '<script src="engine.js"></script>'
 
 
-def read_key() -> str:
+def read_env(name: str, *, required: bool = True, default: str = "") -> str:
     for line in ENV.read_text(encoding="utf-8").splitlines():
         line = line.strip()
-        if line.startswith("OPENROUTER_API_KEY="):
+        if line.startswith(f"{name}="):
             return line.split("=", 1)[1].strip()
-    sys.exit("ERROR: OPENROUTER_API_KEY not found in .env")
+    if required:
+        sys.exit(f"ERROR: {name} not found in .env")
+    return default
+
+
+def read_key() -> str:
+    return read_env("OPENROUTER_API_KEY")
 
 
 def main() -> None:
     html = TEMPLATE.read_text(encoding="utf-8")
     engine = ENGINE.read_text(encoding="utf-8")
     key = read_key()
+    # Supabase values are public (RLS-protected); optional so file:// builds
+    # without a database still work (engine falls back to IndexedDB).
+    sb_url = read_env("SUPABASE_URL", required=False)
+    sb_key = read_env("SUPABASE_ANON_KEY", required=False)
 
     if SCRIPT_TAG not in html:
         sys.exit(f"ERROR: expected {SCRIPT_TAG!r} in template")
@@ -48,8 +60,10 @@ def main() -> None:
 
     # Inline the engine in place of the external script tag.
     html = html.replace(SCRIPT_TAG, f"<script>\n{engine}\n</script>")
-    # Inject the real key.
+    # Inject the real key and Supabase config.
     html = html.replace(PLACEHOLDER, key)
+    html = html.replace(SB_URL_PLACEHOLDER, sb_url)
+    html = html.replace(SB_KEY_PLACEHOLDER, sb_key)
 
     if PLACEHOLDER in html:
         sys.exit("ERROR: placeholder still present after injection")
