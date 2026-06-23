@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(grep -i \"\\\\.env$\")",
+      "Bash(py -m venv .venv)",
+      "Bash(./.venv/Scripts/python.exe -m pip install -q --upgrade pip)",
+      "Bash(./.venv/Scripts/python.exe -m pip install -q -r requirements.txt)",
+      "Bash(./.venv/Scripts/python.exe main.py)",
+      "Read(//c//**)",
+      "Bash(rm -rf \"C:/Users/hongq/OneDrive/Desktop/VibeCoding/spellingbee/.venv\")",
+      "Bash(./.venv/Scripts/python.exe *)",
+      "Bash(break)",
+      "Bash(./.venv/Scripts/python.exe -u diag2.py)",
+      "Bash(echo \"EXIT $?\")",
+      "Bash(node engine.test.mjs)",
+      "Bash(grep -q \"^index.html$\" .gitignore)",
+      "Bash(npm i *)",
+      "Bash(npx playwright *)",
+      "Bash(node *)",
+      "PowerShell(Get-ChildItem C:\\\\dev\\\\spellingbee -File | Select-Object Name,Length | Format-Table -AutoSize; \"lock lines:\"; \\(Get-Content C:\\\\dev\\\\spellingbee\\\\package-lock.json | Measure-Object -Line\\).Lines)"
+    ]
+  }
+}

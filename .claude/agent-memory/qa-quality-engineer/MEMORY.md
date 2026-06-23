@@ -1,0 +1,1 @@
+- [SnapQuiz Testing](project-snapquiz-testing.md) — test commands, Playwright setup, bug history, build rules for spellingbee project

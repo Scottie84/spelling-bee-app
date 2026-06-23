@@ -1,0 +1,755 @@
+/**
+ * engine.js — SnapQuiz client-side engine
+ *
+ * Exposes a single global: window.SnapEngine
+ * Runs as plain ES2020 browser JS (no bundler, no Node server).
+ * Designed to be testable in Node 24 via engine.test.mjs:
+ *   - all quiz logic is pure (no DOM / IndexedDB dependencies)
+ *   - the persistence layer is swapped at init() time:
+ *       browser  → IndexedDB (falls back to localStorage)
+ *       Node/test → in-memory Map (when indexedDB is not defined)
+ *
+ * API contract (see PRD §4, §8 and the task spec):
+ *   SnapEngine.init()
+ *   SnapEngine.setApiKey(key)
+ *   SnapEngine.getAllWords()
+ *   SnapEngine.getGroups()
+ *   SnapEngine.addWords(words, group)
+ *   SnapEngine.updateWord(id, patch)
+ *   SnapEngine.deleteWord(id)
+ *   SnapEngine.clearAll()
+ *   SnapEngine.exportJSON()
+ *   SnapEngine.importJSON(json)
+ *   SnapEngine.extractWordsFromImage(dataUrlOrBase64, opts?)
+ *   SnapEngine.buildQuiz({scope, group, count, types})
+ *   SnapEngine.recordAnswer(wordId, correct)
+ */
+
+(function (global) {
+  'use strict';
+
+  // ---------------------------------------------------------------------------
+  // Constants
+  // ---------------------------------------------------------------------------
+
+  const DB_NAME    = 'SnapQuizDB';
+  const DB_VERSION = 1;
+  const STORE_NAME = 'words';
+
+  const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
+  const PRIMARY_MODEL   = 'nvidia/nemotron-nano-12b-v2-vl:free';
+  const FALLBACK_MODEL  = 'nex-agi/nex-n2-pro:free';
+  const TIMEOUT_MS      = 60_000; // 60 s per model attempt
+
+  // ---------------------------------------------------------------------------
+  // Internal state
+  // ---------------------------------------------------------------------------
+
+  let _apiKey  = (global.SNAP_CONFIG && global.SNAP_CONFIG.apiKey) || '';
+  let _db      = null;   // IDBDatabase | null
+  let _useIDB  = false;  // true when IndexedDB is available and opened
+  let _useLST  = false;  // true when falling back to localStorage
+  let _memStore = null;  // Map<id, Word> | null — used in Node / no-storage env
+
+  // ---------------------------------------------------------------------------
+  // Utility helpers
+  // ---------------------------------------------------------------------------
+
+  /** Generate a random id like "w_a3f9b2". */
+  function _newId() {
+    return 'w_' + Math.random().toString(36).slice(2, 8);
+  }
+
+  /** Fisher-Yates in-place shuffle. Returns the same array. */
+  function _shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  /** Case-insensitive trim. */
+  function _norm(s) {
+    return (s || '').trim().toLowerCase();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Persistence layer — three interchangeable backends
+  // ---------------------------------------------------------------------------
+
+  // --- In-memory (Node test / no storage) ---
+
+  function _memInit() {
+    _memStore = _memStore || new Map();
+  }
+
+  function _memGetAll() {
+    return Array.from(_memStore.values());
+  }
+
+  function _memPut(word) {
+    _memStore.set(word.id, word);
+  }
+
+  function _memDelete(id) {
+    _memStore.delete(id);
+  }
+
+  function _memClear() {
+    _memStore.clear();
+  }
+
+  // --- localStorage fallback ---
+
+  const LST_KEY = 'snapquiz_words';
+
+  function _lstRead() {
+    try {
+      return JSON.parse(global.localStorage.getItem(LST_KEY) || '[]');
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function _lstWrite(words) {
+    global.localStorage.setItem(LST_KEY, JSON.stringify(words));
+  }
+
+  function _lstGetAll() {
+    return _lstRead();
+  }
+
+  function _lstPut(word) {
+    const words = _lstRead();
+    const idx   = words.findIndex(w => w.id === word.id);
+    if (idx >= 0) words[idx] = word;
+    else words.push(word);
+    _lstWrite(words);
+  }
+
+  function _lstDelete(id) {
+    _lstWrite(_lstRead().filter(w => w.id !== id));
+  }
+
+  function _lstClear() {
+    _lstWrite([]);
+  }
+
+  // --- IndexedDB ---
+
+  function _idbGetAll() {
+    return new Promise((resolve, reject) => {
+      const tx  = _db.transaction(STORE_NAME, 'readonly');
+      const req = tx.objectStore(STORE_NAME).getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror   = () => reject(req.error);
+    });
+  }
+
+  function _idbPut(word) {
+    return new Promise((resolve, reject) => {
+      const tx  = _db.transaction(STORE_NAME, 'readwrite');
+      const req = tx.objectStore(STORE_NAME).put(word);
+      req.onsuccess = () => resolve();
+      req.onerror   = () => reject(req.error);
+    });
+  }
+
+  function _idbDelete(id) {
+    return new Promise((resolve, reject) => {
+      const tx  = _db.transaction(STORE_NAME, 'readwrite');
+      const req = tx.objectStore(STORE_NAME).delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror   = () => reject(req.error);
+    });
+  }
+
+  function _idbClear() {
+    return new Promise((resolve, reject) => {
+      const tx  = _db.transaction(STORE_NAME, 'readwrite');
+      const req = tx.objectStore(STORE_NAME).clear();
+      req.onsuccess = () => resolve();
+      req.onerror   = () => reject(req.error);
+    });
+  }
+
+  // --- Dispatch to the active backend ---
+
+  async function _getAll()     { if (_useIDB) return _idbGetAll(); if (_useLST) return _lstGetAll(); return _memGetAll(); }
+  async function _put(word)    { if (_useIDB) return _idbPut(word); if (_useLST) return _lstPut(word); return _memPut(word); }
+  async function _del(id)      { if (_useIDB) return _idbDelete(id); if (_useLST) return _lstDelete(id); return _memDelete(id); }
+  async function _clearStore() { if (_useIDB) return _idbClear(); if (_useLST) return _lstClear(); return _memClear(); }
+
+  // ---------------------------------------------------------------------------
+  // init() — opens the right storage backend
+  // ---------------------------------------------------------------------------
+
+  async function init() {
+    // Node environment (no indexedDB global) → in-memory
+    if (typeof indexedDB === 'undefined') {
+      _memInit();
+      return;
+    }
+
+    // Try IndexedDB first
+    try {
+      _db = await new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+          }
+        };
+
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror   = (e) => reject(e.target.error);
+      });
+      _useIDB = true;
+      return;
+    } catch (err) {
+      console.warn('[SnapEngine] IndexedDB unavailable, trying localStorage:', err);
+    }
+
+    // Fall back to localStorage
+    if (typeof global.localStorage !== 'undefined') {
+      _useLST = true;
+      return;
+    }
+
+    // Last resort: in-memory (won't survive page reload)
+    console.warn('[SnapEngine] No persistent storage available; using in-memory store.');
+    _memInit();
+  }
+
+  // ---------------------------------------------------------------------------
+  // setApiKey
+  // ---------------------------------------------------------------------------
+
+  function setApiKey(key) {
+    _apiKey = key || '';
+  }
+
+  // ---------------------------------------------------------------------------
+  // getAllWords / getGroups
+  // ---------------------------------------------------------------------------
+
+  async function getAllWords() {
+    return _getAll();
+  }
+
+  async function getGroups() {
+    const words = await _getAll();
+    const counts = new Map();
+    for (const w of words) {
+      counts.set(w.group, (counts.get(w.group) || 0) + 1);
+    }
+    return Array.from(counts.entries()).map(([name, count]) => ({ name, count }));
+  }
+
+  // ---------------------------------------------------------------------------
+  // addWords — dedupes by (word + group), case-insensitive
+  // ---------------------------------------------------------------------------
+
+  async function addWords(partials, group) {
+    const existing = await _getAll();
+    // Build a set of "word|group" keys for dedup check
+    const seen = new Set(existing.map(w => `${_norm(w.word)}|${_norm(w.group)}`));
+
+    const now   = new Date().toISOString();
+    const added = [];
+
+    for (const p of partials) {
+      const key = `${_norm(p.word)}|${_norm(group)}`;
+      if (seen.has(key)) continue; // duplicate — skip
+
+      const word = {
+        id:      _newId(),
+        word:    (p.word    || '').trim(),
+        pos:     (p.pos     || '').trim(),
+        meaning: (p.meaning || '').trim(),
+        example: (p.example || '').trim(),
+        syn:     (p.syn     || '').trim(),
+        ant:     (p.ant     || '').trim(),
+        group:   group,
+        addedAt: now,
+        stats:   { seen: 0, correct: 0, wrong: 0 },
+      };
+
+      await _put(word);
+      seen.add(key);
+      added.push(word);
+    }
+
+    return added;
+  }
+
+  // ---------------------------------------------------------------------------
+  // updateWord
+  // ---------------------------------------------------------------------------
+
+  async function updateWord(id, patch) {
+    const words = await _getAll();
+    const word  = words.find(w => w.id === id);
+    if (!word) throw new Error(`[SnapEngine] Word not found: ${id}`);
+
+    // Merge patch — do not allow overwriting id or addedAt
+    const { id: _i, addedAt: _a, stats: patchStats, ...rest } = patch;
+    Object.assign(word, rest);
+
+    if (patchStats) {
+      word.stats = { ...word.stats, ...patchStats };
+    }
+
+    await _put(word);
+    return word;
+  }
+
+  // ---------------------------------------------------------------------------
+  // deleteWord
+  // ---------------------------------------------------------------------------
+
+  async function deleteWord(id) {
+    await _del(id);
+  }
+
+  // ---------------------------------------------------------------------------
+  // clearAll
+  // ---------------------------------------------------------------------------
+
+  async function clearAll() {
+    await _clearStore();
+  }
+
+  // ---------------------------------------------------------------------------
+  // exportJSON / importJSON
+  // ---------------------------------------------------------------------------
+
+  async function exportJSON() {
+    const words = await _getAll();
+    return JSON.stringify({ words, exportedAt: new Date().toISOString() }, null, 2);
+  }
+
+  async function importJSON(json) {
+    let data;
+    try {
+      data = JSON.parse(json);
+    } catch (err) {
+      throw new Error('[SnapEngine] importJSON: invalid JSON');
+    }
+
+    const incoming = Array.isArray(data) ? data : (data.words || []);
+    if (!Array.isArray(incoming)) throw new Error('[SnapEngine] importJSON: expected { words: [] }');
+
+    let count = 0;
+    for (const w of incoming) {
+      if (!w || !w.id || !w.word) continue; // malformed
+      await _put({
+        id:      w.id,
+        word:    (w.word    || '').trim(),
+        pos:     (w.pos     || '').trim(),
+        meaning: (w.meaning || '').trim(),
+        example: (w.example || '').trim(),
+        syn:     (w.syn     || '').trim(),
+        ant:     (w.ant     || '').trim(),
+        group:   (w.group   || 'Imported'),
+        addedAt: w.addedAt  || new Date().toISOString(),
+        stats:   w.stats    || { seen: 0, correct: 0, wrong: 0 },
+      });
+      count++;
+    }
+    return count;
+  }
+
+  // ---------------------------------------------------------------------------
+  // extractWordsFromImage — calls OpenRouter with primary/fallback model
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @param {string} dataUrlOrBase64
+   *   Either a full data URI ("data:image/png;base64,...") or raw base64.
+   * @param {object} [opts]
+   *   opts.maxTokens  — override token cap (default 1200)
+   * @returns {Promise<{words: PartialWord[], modelUsed: string, raw?: string}>}
+   */
+  async function extractWordsFromImage(dataUrlOrBase64, opts = {}) {
+    if (!_apiKey) throw new Error('[SnapEngine] API key not set. Call SnapEngine.setApiKey(key) first.');
+
+    const maxTokens = opts.maxTokens || 1200;
+
+    // Normalise to a proper data URI so the model gets a valid image_url
+    let imageUrl = dataUrlOrBase64;
+    if (!imageUrl.startsWith('data:')) {
+      imageUrl = `data:image/png;base64,${imageUrl}`;
+    }
+
+    const systemPrompt = `You are a vocabulary extraction assistant for children's English word books.
+Extract ONLY real English vocabulary words visible in the image (skip page numbers, headers, decorations).
+Return STRICT JSON ONLY — a JSON array, nothing else, no markdown fences, no prose before or after.
+Each element must have exactly these fields:
+  word     — the English word (lowercase, trimmed)
+  pos      — part of speech abbreviation like "n." "v." "adj." "adv." "prep." (empty string if unknown)
+  meaning  — Korean meaning (한글 뜻), concise
+  example  — one short English sentence using the word
+  syn      — a synonym (English word), empty string if none
+  ant      — an antonym (English word), empty string if none
+If there are no vocabulary words in the image, return an empty array: []`;
+
+    const userMessage = [
+      {
+        type: 'text',
+        text: 'Extract all English vocabulary words from this image and return them as a JSON array following the system instructions.',
+      },
+      {
+        type: 'image_url',
+        image_url: { url: imageUrl },
+      },
+    ];
+
+    const errors = [];
+
+    for (const model of [PRIMARY_MODEL, FALLBACK_MODEL]) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+      try {
+        const resp = await fetch(OPENROUTER_ENDPOINT, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${_apiKey}`,
+            'HTTP-Referer':  'https://snapquiz.local',
+            'X-Title':       'SnapQuiz',
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: maxTokens,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user',   content: userMessage },
+            ],
+          }),
+        });
+
+        clearTimeout(timer);
+
+        if (!resp.ok) {
+          const body = await resp.text().catch(() => '');
+          throw new Error(`HTTP ${resp.status}: ${body.slice(0, 200)}`);
+        }
+
+        const json = await resp.json();
+
+        // Defensive: some free models return an error field instead of choices
+        if (json.error) {
+          throw new Error(`Model error: ${JSON.stringify(json.error).slice(0, 200)}`);
+        }
+
+        const raw = (json.choices?.[0]?.message?.content || '').trim();
+        if (!raw) throw new Error('Empty response from model');
+
+        const words = _parseWordArray(raw);
+        if (!words) throw new Error('Could not parse word array from model response');
+
+        return { words, modelUsed: model, raw };
+
+      } catch (err) {
+        clearTimeout(timer);
+        const msg = err.name === 'AbortError' ? 'Timeout after 60 s' : err.message;
+        console.warn(`[SnapEngine] extractWordsFromImage: ${model} failed — ${msg}`);
+        errors.push(`${model}: ${msg}`);
+        // continue to fallback
+      }
+    }
+
+    throw new Error(`[SnapEngine] extractWordsFromImage: all models failed.\n${errors.join('\n')}`);
+  }
+
+  /**
+   * Robustly parse the model's text into PartialWord[].
+   * Handles: markdown fences, prose before/after the array, truncated JSON.
+   */
+  function _parseWordArray(raw) {
+    // Strip common markdown code fences
+    let text = raw.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+
+    // Find the first '[' and last ']'
+    const start = text.indexOf('[');
+    const end   = text.lastIndexOf(']');
+    if (start === -1 || end === -1 || end < start) {
+      // Model might have returned a single object — wrap it
+      const objStart = text.indexOf('{');
+      const objEnd   = text.lastIndexOf('}');
+      if (objStart !== -1 && objEnd !== -1) {
+        text = `[${text.slice(objStart, objEnd + 1)}]`;
+      } else {
+        return null;
+      }
+    } else {
+      text = text.slice(start, end + 1);
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (_) {
+      return null;
+    }
+
+    if (!Array.isArray(parsed)) return null;
+
+    // Normalise each item — be lenient about missing fields
+    return parsed
+      .filter(item => item && typeof item === 'object' && item.word)
+      .map(item => ({
+        word:    _norm(item.word),
+        pos:     (item.pos     || '').trim(),
+        meaning: (item.meaning || '').trim(),
+        example: (item.example || '').trim(),
+        syn:     (item.syn     || '').trim(),
+        ant:     (item.ant     || '').trim(),
+      }))
+      .filter(item => item.word.length > 0);
+  }
+
+  // ---------------------------------------------------------------------------
+  // buildQuiz
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @param {object} opts
+   *   scope  — 'all' | 'group' | 'new' | 'review'
+   *   group  — group name (used when scope === 'group')
+   *   count  — number of questions
+   *   types  — array of 'A'|'B'|'C'|'D' (default: ['A','B','C'])
+   * @returns {Promise<Question[]>}
+   */
+  async function buildQuiz({ scope = 'all', group = null, count = 10, types = ['A', 'B', 'C'] } = {}) {
+    const allWords = await _getAll();
+
+    if (allWords.length < 4) {
+      throw new Error('[SnapEngine] Not enough words to build a quiz. Please add at least 4 words.');
+    }
+
+    // --- Select the pool for this scope ---
+    let pool = _selectPool(allWords, scope, group);
+
+    if (pool.length < 4) {
+      throw new Error(`[SnapEngine] Not enough words in the selected scope ("${scope}"). Need at least 4.`);
+    }
+
+    // --- Clamp count ---
+    const n = Math.min(count, pool.length);
+
+    // Shuffle pool and take first n words as quiz candidates
+    const candidates = _shuffle([...pool]).slice(0, n);
+
+    // --- Build one question per candidate ---
+    const questions = [];
+    for (const word of candidates) {
+      const type = _pickType(word, types);
+      if (!type) continue;
+
+      const q = _makeQuestion(word, type, allWords);
+      if (q) questions.push(q);
+    }
+
+    if (questions.length === 0) {
+      throw new Error('[SnapEngine] Could not generate any questions. Check that words have meaning/example fields.');
+    }
+
+    // Shuffle final question order
+    return _shuffle(questions);
+  }
+
+  /** Select the word pool according to scope. */
+  function _selectPool(allWords, scope, group) {
+    switch (scope) {
+      case 'group':
+        return allWords.filter(w => w.group === group);
+
+      case 'new': {
+        // 'new' = the most recently added batch (same addedAt date or same group)
+        // We use the most-recently-added group
+        if (allWords.length === 0) return [];
+        const sorted = [...allWords].sort((a, b) => b.addedAt.localeCompare(a.addedAt));
+        const latestGroup = sorted[0].group;
+        return allWords.filter(w => w.group === latestGroup);
+      }
+
+      case 'review':
+        // Words that have been answered wrong at least once
+        return allWords.filter(w => w.stats.wrong > 0);
+
+      case 'all':
+      default:
+        return allWords;
+    }
+  }
+
+  /** Pick a question type for the given word, respecting the allowed types list. */
+  function _pickType(word, types) {
+    const allowed = [...types];
+
+    // Type C requires an example sentence
+    const cIdx = allowed.indexOf('C');
+    if (cIdx !== -1 && !word.example) allowed.splice(cIdx, 1);
+
+    // Type D requires syn or ant
+    const dIdx = allowed.indexOf('D');
+    if (dIdx !== -1 && !word.syn && !word.ant) allowed.splice(dIdx, 1);
+
+    if (allowed.length === 0) return null;
+
+    return allowed[Math.floor(Math.random() * allowed.length)];
+  }
+
+  /**
+   * Build a single Question object.
+   * allWords is the full wordbook (used to source distractors).
+   */
+  function _makeQuestion(word, type, allWords) {
+    // Build distractor pool: other words, preferring same group
+    const others = allWords.filter(w => w.id !== word.id);
+    const sameGroup  = others.filter(w => w.group === word.group);
+    const otherGroup = others.filter(w => w.group !== word.group);
+    // Prefer same-group distractors, pad with cross-group if needed
+    const distPool = _shuffle([...sameGroup, ...otherGroup]);
+
+    let promptText;
+    let promptLabel;
+    let correctChoice;
+    let getDistractorChoice; // (w: Word) => string
+
+    switch (type) {
+      case 'A':
+        // Show meaning, pick the WORD
+        promptText        = word.meaning;
+        promptLabel       = '다음 뜻에 맞는 단어를 고르세요:';
+        correctChoice     = word.word;
+        getDistractorChoice = w => w.word;
+        break;
+
+      case 'B':
+        // Show word, pick the MEANING
+        promptText        = word.word;
+        promptLabel       = '다음 단어의 뜻을 고르세요:';
+        correctChoice     = word.meaning;
+        getDistractorChoice = w => w.meaning;
+        break;
+
+      case 'C': {
+        // Blank the word in the example sentence, pick the WORD
+        const blank = '____';
+        const re    = new RegExp(`\\b${_escapeRegex(word.word)}\\b`, 'gi');
+        const filled = word.example.replace(re, blank);
+        promptText        = filled || `${blank}: ${word.meaning}`;
+        promptLabel       = '빈칸에 알맞은 단어를 고르세요:';
+        correctChoice     = word.word;
+        getDistractorChoice = w => w.word;
+        break;
+      }
+
+      case 'D': {
+        // Synonym or antonym question — pick the WORD
+        const useSyn  = word.syn && (!word.ant || Math.random() < 0.5);
+        const relWord = useSyn ? word.syn : word.ant;
+        const relLabel = useSyn ? '유의어(synonym)' : '반의어(antonym)';
+        promptText        = `"${relWord}"의 ${relLabel}`;
+        promptLabel       = '다음에 맞는 단어를 고르세요:';
+        correctChoice     = word.word;
+        getDistractorChoice = w => w.word;
+        break;
+      }
+
+      default:
+        return null;
+    }
+
+    // Collect up to 3 unique distractors whose choice text differs from the correct choice
+    const distractors = [];
+    const usedChoices = new Set([_norm(correctChoice)]);
+
+    for (const d of distPool) {
+      if (distractors.length >= 3) break;
+      const choice = getDistractorChoice(d);
+      if (!choice) continue;
+      const normChoice = _norm(choice);
+      if (usedChoices.has(normChoice)) continue;
+      usedChoices.add(normChoice);
+      distractors.push(choice);
+    }
+
+    if (distractors.length < 3) {
+      // Not enough unique distractors — skip this question
+      return null;
+    }
+
+    // Assemble and shuffle the 4 choices
+    const choices = _shuffle([correctChoice, ...distractors]);
+    const answerIndex = choices.findIndex(c => _norm(c) === _norm(correctChoice));
+
+    return {
+      id:          _newId(),
+      type,
+      wordId:      word.id,
+      promptText,
+      promptLabel,
+      choices,
+      answerIndex,
+      word,
+    };
+  }
+
+  function _escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // ---------------------------------------------------------------------------
+  // recordAnswer — updates stats and persists
+  // ---------------------------------------------------------------------------
+
+  async function recordAnswer(wordId, correct) {
+    const words = await _getAll();
+    const word  = words.find(w => w.id === wordId);
+    if (!word) return; // silently ignore unknown ids
+
+    word.stats.seen   += 1;
+    if (correct) word.stats.correct += 1;
+    else         word.stats.wrong   += 1;
+
+    await _put(word);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Public API surface
+  // ---------------------------------------------------------------------------
+
+  const SnapEngine = {
+    init,
+    setApiKey,
+    getAllWords,
+    getGroups,
+    addWords,
+    updateWord,
+    deleteWord,
+    clearAll,
+    exportJSON,
+    importJSON,
+    extractWordsFromImage,
+    buildQuiz,
+    recordAnswer,
+  };
+
+  // Attach to global (window in browser, global in Node when loaded via require/import shim)
+  if (typeof global !== 'undefined') {
+    global.SnapEngine = SnapEngine;
+  }
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = SnapEngine;
+  }
+
+}(typeof globalThis !== 'undefined' ? globalThis : this));
