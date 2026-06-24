@@ -13,8 +13,13 @@
  */
 
 const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
-const PRIMARY_MODEL  = 'nvidia/nemotron-nano-12b-v2-vl:free';
-const FALLBACK_MODEL = 'nex-agi/nex-n2-pro:free';
+// Tried in order. Free vision models are heavily rate-limited (429), so we keep
+// several working fallbacks. Keep in sync with engine.js (VISION_MODELS).
+const VISION_MODELS = [
+  'google/gemma-4-31b-it:free',
+  'google/gemma-4-26b-a4b-it:free',
+  'nvidia/nemotron-nano-12b-v2-vl:free',
+];
 
 const SYSTEM_PROMPT = `You are a vocabulary extraction assistant for children's English word books.
 Extract ONLY real English vocabulary words visible in the image (skip page numbers, headers, decorations).
@@ -104,7 +109,7 @@ module.exports = async function handler(req, res) {
   ];
 
   const errors = [];
-  for (const model of [PRIMARY_MODEL, FALLBACK_MODEL]) {
+  for (const model of VISION_MODELS) {
     try {
       const resp = await fetch(OPENROUTER_ENDPOINT, {
         method: 'POST',

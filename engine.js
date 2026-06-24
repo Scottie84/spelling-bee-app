@@ -37,8 +37,15 @@
   const STORE_NAME = 'words';
 
   const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
-  const PRIMARY_MODEL   = 'nvidia/nemotron-nano-12b-v2-vl:free';
-  const FALLBACK_MODEL  = 'nex-agi/nex-n2-pro:free';
+  // Tried in order. Free vision models are heavily rate-limited (429), so we
+  // keep several working fallbacks — if the first is throttled we try the next.
+  // NOTE: keep this list in sync with api/extract.js (VISION_MODELS).
+  const VISION_MODELS = [
+    'google/gemma-4-31b-it:free',
+    'google/gemma-4-26b-a4b-it:free',
+    'nvidia/nemotron-nano-12b-v2-vl:free',
+  ];
+  const PRIMARY_MODEL   = VISION_MODELS[0]; // kept for backwards-compat refs
   const TIMEOUT_MS      = 60_000; // 60 s per model attempt
 
   // ---------------------------------------------------------------------------
@@ -510,7 +517,7 @@ If there are no vocabulary words in the image, return an empty array: []`;
 
     const errors = [];
 
-    for (const model of [PRIMARY_MODEL, FALLBACK_MODEL]) {
+    for (const model of VISION_MODELS) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
