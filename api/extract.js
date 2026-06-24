@@ -144,6 +144,10 @@ module.exports = async function handler(req, res) {
 
       const words = parseWordArray(raw);
       if (!words) throw new Error('Could not parse word array from model response');
+      // A word-list photo that parses to zero words almost always means the
+      // model punted — throttled free models often return "[]" instead of
+      // doing the work. Treat empty as a soft failure and fall through.
+      if (words.length === 0) throw new Error('Model returned no words (likely throttled)');
 
       res.status(200).json({ words, modelUsed: model });
       return;

@@ -563,6 +563,10 @@ If there are no vocabulary words in the image, return an empty array: []`;
 
         const words = _parseWordArray(raw);
         if (!words) throw new Error('Could not parse word array from model response');
+        // A word-list photo that parses to zero words almost always means the
+        // model punted — throttled free models often return "[]" in ~2s instead
+        // of doing the work. Treat empty as a soft failure and fall through.
+        if (words.length === 0) throw new Error('Model returned no words (likely throttled)');
 
         return { words, modelUsed: model, raw };
 
