@@ -40,10 +40,13 @@
   // Tried in order. Free vision models are heavily rate-limited (429), so we
   // keep several working fallbacks — if the first is throttled we try the next.
   // NOTE: keep this list in sync with api/extract.js (VISION_MODELS).
+  // nemotron is a dedicated vision model and the most reliable free one;
+  // the Gemma "free" models are frequently 429-throttled upstream, so they
+  // sit behind it as higher-quality-but-flaky fallbacks.
   const VISION_MODELS = [
+    'nvidia/nemotron-nano-12b-v2-vl:free',
     'google/gemma-4-31b-it:free',
     'google/gemma-4-26b-a4b-it:free',
-    'nvidia/nemotron-nano-12b-v2-vl:free',
   ];
   const PRIMARY_MODEL   = VISION_MODELS[0]; // kept for backwards-compat refs
   const TIMEOUT_MS      = 60_000; // 60 s per model attempt
