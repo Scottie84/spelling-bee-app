@@ -478,47 +478,42 @@
     ========================================================= */
     #screen-add { gap: var(--gap); }
 
-    .photo-drop-area {
+    /* Add-method options (camera vs gallery) */
+    .add-options {
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      justify-content: center;
+    }
+    .photo-option-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: var(--gap);
+      gap: 8px;
       border: 3px dashed var(--border);
       border-radius: var(--radius);
       background: var(--purple-light);
       padding: var(--gap-lg);
-      min-height: 240px;
+      min-height: 170px;
       cursor: pointer;
-      transition: background .15s, border-color .15s;
-      position: relative;
+      transition: background .15s, border-color .15s, transform .1s;
+      color: var(--purple);
+      width: 100%;
     }
-    .photo-drop-area:hover,
-    .photo-drop-area:focus-within {
+    .photo-option-btn:hover,
+    .photo-option-btn:focus-visible {
       background: #E0DDFF;
       border-color: var(--purple);
     }
-    .photo-drop-area .drop-emoji { font-size: 56px; }
-    .photo-drop-area p {
-      font-size: var(--fs-md);
-      font-weight: 700;
-      color: var(--purple);
-      text-align: center;
-    }
-    .photo-drop-area span {
-      font-size: var(--fs-xs);
-      color: var(--text-sub);
-    }
-    /* Hide native file input visually but keep accessible */
-    #file-input {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-    }
+    .photo-option-btn:active { transform: scale(.98); }
+    .photo-option-btn .opt-emoji { font-size: 52px; }
+    .photo-option-btn .opt-title { font-size: var(--fs-md); font-weight: 800; }
+    .photo-option-btn .opt-sub { font-size: var(--fs-xs); color: var(--text-sub); font-weight: 600; }
+    .photo-option-btn.gallery { background: var(--green-light); border-color: #B6EFDF; color: #028f6b; }
+    .photo-option-btn.gallery:hover,
+    .photo-option-btn.gallery:focus-visible { background: #CFF7EC; border-color: var(--green); }
 
     /* Loading state */
     .loading-box {
@@ -1226,7 +1221,7 @@
 
     <div class="home-actions">
       <button class="btn-primary" id="btn-add-photo" style="font-size: var(--fs-lg); min-height: 80px;">
-        📷 사진으로 단어 추가
+        ➕ 단어 추가
       </button>
       <button class="btn-primary teal" id="btn-start-quiz" style="font-size: var(--fs-lg); min-height: 80px;">
         ▶ 퀴즈 시작
@@ -1274,17 +1269,30 @@
   <section id="screen-add" class="screen" role="main" aria-label="사진으로 단어 추가">
     <div class="top-bar">
       <button class="btn-icon" id="btn-add-back" aria-label="홈으로 돌아가기">←</button>
-      <h1>📷 사진 추가</h1>
+      <h1>➕ 단어 추가</h1>
     </div>
 
-    <!-- Drop / tap area -->
-    <div class="photo-drop-area" id="photo-drop-area" role="button" tabindex="0"
-         aria-label="사진을 선택하려면 탭하세요">
-      <input type="file" id="file-input" accept="image/*" capture="environment"
-             aria-label="사진 선택" />
-      <div class="drop-emoji" aria-hidden="true">📸</div>
-      <p>여기를 탭해서 사진 선택</p>
-      <span>카메라 또는 갤러리에서 불러오기</span>
+    <!-- Hidden file inputs: camera forces the device camera (capture),
+         gallery omits capture so the photo library / file picker opens. -->
+    <input type="file" id="file-input-camera"  accept="image/*" capture="environment"
+           class="hidden" tabindex="-1" aria-hidden="true" />
+    <input type="file" id="file-input-gallery" accept="image/*"
+           class="hidden" tabindex="-1" aria-hidden="true" />
+
+    <!-- Two ways to add words -->
+    <div class="add-options" id="add-options">
+      <button class="photo-option-btn" id="opt-camera" type="button"
+              aria-label="카메라로 촬영해서 단어 추가">
+        <span class="opt-emoji" aria-hidden="true">📷</span>
+        <span class="opt-title">사진으로 단어 추가</span>
+        <span class="opt-sub">카메라로 바로 촬영</span>
+      </button>
+      <button class="photo-option-btn gallery" id="opt-gallery" type="button"
+              aria-label="갤러리에서 사진 불러오기">
+        <span class="opt-emoji" aria-hidden="true">🖼️</span>
+        <span class="opt-title">갤러리에서 불러오기</span>
+        <span class="opt-sub">저장된 사진 선택</span>
+      </button>
     </div>
 
     <!-- Loading state (hidden by default) -->
@@ -1656,28 +1664,38 @@ document.getElementById('btn-clear-all').addEventListener('click', async () => {
 /* =============================================================
    SCREEN 2 — ADD PHOTO
 ============================================================= */
-// Allow keyboard Enter/Space on the drop area
-document.getElementById('photo-drop-area').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    document.getElementById('file-input').click();
-  }
-});
-
 document.getElementById('btn-add-back').addEventListener('click', () => showScreen('home'));
 
-let _lastFileUrl = null; // so "retry" can reuse same image
+let _lastFileUrl = null;      // so "retry" can reuse same image
+let _lastSource  = 'gallery'; // 'camera' | 'gallery' — which picker to reopen on retry
 
-document.getElementById('file-input').addEventListener('change', async (e) => {
+// Open the camera or gallery picker. Must run inside a user gesture (click).
+function pickImage(source) {
+  _lastSource = source;
+  const id = source === 'camera' ? 'file-input-camera' : 'file-input-gallery';
+  document.getElementById(id).click();
+}
+
+// Shared change handler for both inputs.
+async function onImageChosen(e) {
   const file = e.target.files[0];
+  e.target.value = ''; // reset so the same file can be re-selected
   if (!file) return;
-  e.target.value = ''; // reset so same file can be re-selected
+  if (!document.getElementById('screen-add').classList.contains('active')) {
+    showScreen('add'); // ensure the loading/error UI is visible
+  }
   await processImageFile(file);
-});
+}
+document.getElementById('file-input-camera').addEventListener('change', onImageChosen);
+document.getElementById('file-input-gallery').addEventListener('change', onImageChosen);
+
+// In-screen option buttons
+document.getElementById('opt-camera').addEventListener('click', () => pickImage('camera'));
+document.getElementById('opt-gallery').addEventListener('click', () => pickImage('gallery'));
 
 async function processImageFile(file) {
   // Show loading
-  document.getElementById('photo-drop-area').classList.add('hidden');
+  document.getElementById('add-options').classList.add('hidden');
   document.getElementById('extract-error').classList.add('hidden');
   const loadingBox = document.getElementById('loading-box');
   loadingBox.classList.remove('hidden');
@@ -1698,12 +1716,12 @@ async function processImageFile(file) {
 
     // Move to confirm screen
     loadingBox.classList.add('hidden');
-    document.getElementById('photo-drop-area').classList.remove('hidden');
+    document.getElementById('add-options').classList.remove('hidden');
     openConfirmScreen(words);
 
   } catch (err) {
     loadingBox.classList.add('hidden');
-    document.getElementById('photo-drop-area').classList.remove('hidden');
+    document.getElementById('add-options').classList.remove('hidden');
     const errBox = document.getElementById('extract-error');
     document.getElementById('extract-error-msg').textContent = err.message;
     errBox.classList.remove('hidden');
@@ -1723,7 +1741,7 @@ function readFileAsDataUrl(file) {
 // Retry button — re-trigger file picker
 document.getElementById('btn-retry-extract').addEventListener('click', () => {
   document.getElementById('extract-error').classList.add('hidden');
-  document.getElementById('file-input').click();
+  pickImage(_lastSource); // reopen whichever picker was last used
 });
 
 // Manual entry fallback — open confirm screen with one empty row
