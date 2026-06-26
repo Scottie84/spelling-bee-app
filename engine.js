@@ -355,6 +355,64 @@
   }
 
   // ---------------------------------------------------------------------------
+  // renameGroup — rename a group, or merge it into an existing one
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Move every word in group `oldName` to `newName`. If `newName` is a group
+   * that already exists, the two merge (and words duplicated by name are
+   * de-duplicated, keeping the existing copy in the target group).
+   *
+   * Groups are derived from each word's `group` field — there is no separate
+   * group record — so this is the one operation behind both "rename" and "merge".
+   *
+   * @returns {Promise<{moved:number, deletedDuplicates:number, merged:boolean}>}
+   */
+  async function renameGroup(oldName, newName) {
+    const from = (oldName || '').trim();
+    const to   = (newName || '').trim();
+    if (!from) throw new Error('[SnapEngine] renameGroup: source group is required.');
+    if (!to)   throw new Error('[SnapEngine] renameGroup: new group name is required.');
+    if (from === to) return { moved: 0, deletedDuplicates: 0, merged: false };
+
+    const all     = await _getAll();
+    const targets = all.filter(w => w.group === from);
+    if (targets.length === 0) {
+      throw new Error(`[SnapEngine] renameGroup: group "${from}" not found.`);
+    }
+
+    // Words already in the destination — used to detect a merge and to dedup.
+    const destWords = new Set(all.filter(w => w.group === to).map(w => _norm(w.word)));
+    const merged    = destWords.size > 0;
+
+    // Source words whose name already lives in the destination would become
+    // duplicates after the move, so drop those source copies instead.
+    const dupes = targets.filter(w => destWords.has(_norm(w.word)));
+    const movers = targets.filter(w => !destWords.has(_norm(w.word)));
+
+    if (_useSB) {
+      for (const w of dupes) await _sbDelete(w.id);
+      if (movers.length > 0) {
+        // One bulk PATCH for everything that actually moves.
+        const moverIds = movers.map(w => `"${w.id}"`).join(',');
+        await _sbFetch(`${SB_TABLE}?id=in.(${encodeURIComponent(moverIds)})`, {
+          method: 'PATCH',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ group_name: to }),
+        });
+      }
+    } else {
+      for (const w of dupes) await _del(w.id);
+      for (const w of movers) {
+        w.group = to;
+        await _put(w);
+      }
+    }
+
+    return { moved: movers.length, deletedDuplicates: dupes.length, merged };
+  }
+
+  // ---------------------------------------------------------------------------
   // addWords — dedupes by (word + group), case-insensitive
   // ---------------------------------------------------------------------------
 
@@ -1080,6 +1138,7 @@ Rules:
     setApiKey,
     getAllWords,
     getGroups,
+    renameGroup,
     addWords,
     updateWord,
     deleteWord,

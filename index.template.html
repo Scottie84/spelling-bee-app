@@ -919,6 +919,59 @@
       display: flex; align-items: center; justify-content: center;
     }
 
+    /* --- Group management --- */
+    .wb-groups-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--gap);
+    }
+    .btn-manage {
+      background: var(--purple-light);
+      color: var(--purple);
+      font-size: var(--fs-xs);
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 6px 14px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .btn-manage:hover { background: #DEDBFF; }
+
+    #group-manage-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+    }
+    #group-manage-modal.open { display: flex; }
+
+    .btn-primary.sm { min-height: 46px; font-size: var(--fs-sm); }
+
+    .gm-section { display: flex; flex-direction: column; gap: 10px; }
+    .gm-row { display: flex; gap: 8px; align-items: center; }
+    .gm-row select, .gm-row input {
+      flex: 1;
+      min-width: 0;
+      border: 2px solid var(--purple);
+      border-radius: var(--radius-sm);
+      padding: 11px;
+      font-size: var(--fs-sm);
+      font-family: inherit;
+      background: var(--surface);
+    }
+    .gm-merge-row .gm-arrow { flex-shrink: 0; font-weight: 800; color: var(--text-sub); }
+    .gm-hint { font-size: var(--fs-xs); color: var(--text-sub); line-height: 1.4; }
+    .gm-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+    .gm-msg {
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: var(--fs-sm);
+      font-weight: 700;
+    }
+    .gm-msg.ok   { background: var(--green-light); color: #028f6b; }
+    .gm-msg.err  { background: var(--red-light);   color: #c0373b; }
+
     /* =========================================================
        SCREEN 5 — QUIZ SETUP
     ========================================================= */
@@ -1471,6 +1524,10 @@
              aria-label="단어 검색" autocomplete="off" />
     </div>
 
+    <div class="wb-groups-head">
+      <span class="section-label" style="margin:0;">그룹</span>
+      <button class="btn-manage" id="btn-manage-groups" aria-haspopup="dialog">⚙️ 그룹 관리</button>
+    </div>
     <div class="group-chips" id="group-chips" role="list" aria-label="그룹 필터"></div>
 
     <div id="wordbook-list" aria-label="단어 목록" aria-live="polite"></div>
@@ -1488,6 +1545,49 @@
         <!-- filled by JS -->
       </div>
       <button class="btn-primary" id="btn-save-edit">저장</button>
+    </div>
+  </div>
+
+  <!-- Group management modal (rename + merge) -->
+  <div id="group-manage-modal" role="dialog" aria-modal="true" aria-labelledby="group-modal-title">
+    <div class="modal-overlay" id="group-modal-overlay"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="group-modal-title">⚙️ 그룹 관리</h2>
+        <button class="btn-close-modal" id="btn-close-group-modal" aria-label="모달 닫기">✕</button>
+      </div>
+
+      <div id="group-modal-empty" class="hidden" style="color:var(--text-sub); font-size:var(--fs-sm); text-align:center; padding:var(--gap);">
+        아직 그룹이 없어요.
+      </div>
+
+      <div id="group-modal-body">
+        <!-- Rename -->
+        <div class="gm-section">
+          <p class="section-label">✏️ 이름 변경</p>
+          <div class="gm-row">
+            <select id="gm-rename-select" aria-label="이름을 변경할 그룹"></select>
+            <input id="gm-rename-input" type="text" placeholder="새 그룹 이름" maxlength="40" aria-label="새 그룹 이름" />
+          </div>
+          <button class="btn-primary sm" id="btn-do-rename">이름 변경</button>
+        </div>
+
+        <hr class="gm-divider" />
+
+        <!-- Merge -->
+        <div class="gm-section" id="gm-merge-section">
+          <p class="section-label">🔀 그룹 합치기</p>
+          <div class="gm-row gm-merge-row">
+            <select id="gm-merge-from" aria-label="합칠 그룹 (원본)"></select>
+            <span class="gm-arrow" aria-hidden="true">→</span>
+            <select id="gm-merge-to" aria-label="합쳐질 대상 그룹"></select>
+          </div>
+          <p class="gm-hint">원본 그룹의 단어가 모두 대상 그룹으로 이동해요. 같은 단어는 자동으로 합쳐집니다.</p>
+          <button class="btn-primary sm orange" id="btn-do-merge">합치기</button>
+        </div>
+      </div>
+
+      <div id="group-modal-msg" role="status" aria-live="polite" class="gm-msg hidden"></div>
     </div>
   </div>
 
@@ -2458,6 +2558,122 @@ document.getElementById('word-edit-modal').addEventListener('keydown', (e) => {
   const first = focusable[0], last = focusable[focusable.length - 1];
   if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+/* =============================================================
+   GROUP MANAGEMENT (rename + merge)
+============================================================= */
+function gmShowMsg(text, kind) {
+  const el = document.getElementById('group-modal-msg');
+  el.textContent = text;
+  el.className = 'gm-msg ' + (kind || 'ok');
+  el.classList.remove('hidden');
+}
+
+// (Re)fill the modal's selects from the current group list. Leaves the status
+// message untouched so a success/error note survives a post-change refresh.
+async function gmPopulate() {
+  const groups = await SnapEngine.getGroups();
+  const empty = document.getElementById('group-modal-empty');
+  const body  = document.getElementById('group-modal-body');
+
+  if (groups.length === 0) {
+    empty.classList.remove('hidden');
+    body.classList.add('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  body.classList.remove('hidden');
+
+  const opts = groups.map(g => `<option value="${esc(g.name)}">${esc(g.name)} (${g.count})</option>`).join('');
+  document.getElementById('gm-rename-select').innerHTML = opts;
+  document.getElementById('gm-rename-input').value = '';
+  document.getElementById('gm-merge-from').innerHTML = opts;
+  // Default "merge into" to the second group so from/to differ.
+  document.getElementById('gm-merge-to').innerHTML = opts;
+  if (groups.length > 1) document.getElementById('gm-merge-to').selectedIndex = 1;
+
+  // Merge needs at least two groups.
+  document.getElementById('gm-merge-section').style.display = groups.length < 2 ? 'none' : '';
+}
+
+async function openGroupManageModal() {
+  document.getElementById('group-modal-msg').classList.add('hidden');
+  await gmPopulate();
+  document.getElementById('group-manage-modal').classList.add('open');
+}
+
+function closeGroupManageModal() {
+  document.getElementById('group-manage-modal').classList.remove('open');
+}
+
+// Re-render every surface that shows group names after a change.
+async function refreshAfterGroupChange() {
+  await refreshWordbook();
+  await refreshHome();
+}
+
+document.getElementById('btn-manage-groups').addEventListener('click', openGroupManageModal);
+document.getElementById('btn-close-group-modal').addEventListener('click', closeGroupManageModal);
+document.getElementById('group-modal-overlay').addEventListener('click', closeGroupManageModal);
+
+// Rename (also merges if the new name is an existing group)
+document.getElementById('btn-do-rename').addEventListener('click', async () => {
+  const from = document.getElementById('gm-rename-select').value;
+  const to   = document.getElementById('gm-rename-input').value.trim();
+  if (!to) { gmShowMsg('새 그룹 이름을 입력해 주세요.', 'err'); return; }
+  if (to === from) { gmShowMsg('이름이 같아요. 다른 이름을 입력해 주세요.', 'err'); return; }
+
+  const groups = await SnapEngine.getGroups();
+  const willMerge = groups.some(g => g.name === to);
+  if (willMerge && !confirm(`"${to}" 그룹이 이미 있어요. 두 그룹을 합칠까요?\n("${from}"의 단어가 "${to}"로 이동해요)`)) {
+    return;
+  }
+
+  const btn = document.getElementById('btn-do-rename');
+  btn.disabled = true;
+  try {
+    const r = await SnapEngine.renameGroup(from, to);
+    if (_wbFilter === from) _wbFilter = to; // keep the active filter pointed at the renamed group
+    await refreshAfterGroupChange();
+    // Refresh the selects to reflect the new group list, then show the result.
+    await gmPopulate();
+    gmShowMsg(r.merged
+      ? `"${to}"로 합쳤어요. (${r.moved}개 이동${r.deletedDuplicates ? `, 중복 ${r.deletedDuplicates}개 정리` : ''})`
+      : `"${from}" → "${to}"로 변경했어요. (${r.moved}개)`, 'ok');
+  } catch (e) {
+    gmShowMsg('변경 실패: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// Merge: move all words from one group into another
+document.getElementById('btn-do-merge').addEventListener('click', async () => {
+  const from = document.getElementById('gm-merge-from').value;
+  const to   = document.getElementById('gm-merge-to').value;
+  if (from === to) { gmShowMsg('서로 다른 두 그룹을 선택해 주세요.', 'err'); return; }
+  if (!confirm(`"${from}" 그룹을 "${to}" 그룹에 합칠까요?\n("${from}"의 단어가 모두 "${to}"로 이동하고, "${from}"은 사라져요)`)) {
+    return;
+  }
+
+  const btn = document.getElementById('btn-do-merge');
+  btn.disabled = true;
+  try {
+    const r = await SnapEngine.renameGroup(from, to);
+    if (_wbFilter === from) _wbFilter = to;
+    await refreshAfterGroupChange();
+    await gmPopulate();
+    gmShowMsg(`"${from}"을(를) "${to}"에 합쳤어요. (${r.moved}개 이동${r.deletedDuplicates ? `, 중복 ${r.deletedDuplicates}개 정리` : ''})`, 'ok');
+  } catch (e) {
+    gmShowMsg('합치기 실패: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('group-manage-modal').addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeGroupManageModal();
 });
 
 /* =============================================================
