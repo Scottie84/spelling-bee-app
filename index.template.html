@@ -927,6 +927,34 @@
     }
     .count-chip:hover:not(.active) { border-color: var(--purple); }
 
+    .type-chips {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .type-chip {
+      min-height: 60px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border);
+      background: var(--surface);
+      color: var(--text-sub);
+      display: flex; flex-direction: column;
+      align-items: flex-start; justify-content: center;
+      gap: 2px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: all .15s;
+      text-align: left;
+    }
+    .type-chip .type-key  { font-size: var(--fs-md); font-weight: 700; }
+    .type-chip .type-desc { font-size: var(--fs-sm); font-weight: 500; opacity: .8; }
+    .type-chip.active {
+      border-color: var(--purple);
+      background: var(--purple);
+      color: #fff;
+    }
+    .type-chip:hover:not(.active) { border-color: var(--purple); }
+
     /* =========================================================
        SCREEN 6 — QUIZ PLAY
     ========================================================= */
@@ -1433,6 +1461,30 @@
       </div>
     </div>
 
+    <div class="setup-section">
+      <p class="section-label">문제 유형
+        <span style="font-weight:600; color:var(--text-sub); font-size:var(--fs-sm);">(여러 개 선택 가능)</span>
+      </p>
+      <div class="type-chips" role="group" aria-label="문제 유형 선택">
+        <button class="type-chip active" data-type="A" aria-pressed="true">
+          <span class="type-key">뜻 → 단어</span>
+          <span class="type-desc">뜻 보고 단어 고르기</span>
+        </button>
+        <button class="type-chip active" data-type="B" aria-pressed="true">
+          <span class="type-key">단어 → 뜻</span>
+          <span class="type-desc">단어 보고 뜻 고르기</span>
+        </button>
+        <button class="type-chip active" data-type="C" aria-pressed="true">
+          <span class="type-key">빈칸 채우기</span>
+          <span class="type-desc">예문 빈칸에 맞는 단어</span>
+        </button>
+        <button class="type-chip active" data-type="D" aria-pressed="true">
+          <span class="type-key">유의어 / 반의어</span>
+          <span class="type-desc">유의어·반의어로 단어 맞히기</span>
+        </button>
+      </div>
+    </div>
+
     <div class="flex-1"></div>
 
     <div id="setup-error" class="card hidden" role="alert"
@@ -1523,6 +1575,7 @@ const State = {
   quizScope: 'all',
   quizGroup: null,
   quizCount: 10,
+  quizTypes: ['A','B','C','D'], // selected question types (multi-select)
   wrongWords: [],               // { word, meaning } for result screen
   correctCount: 0,
   pendingWords: [],             // PartialWord[] waiting to be confirmed
@@ -2203,6 +2256,21 @@ document.querySelectorAll('.count-chip').forEach(chip => {
   });
 });
 
+// Type chips (multi-select toggle — at least one must stay selected)
+document.querySelectorAll('.type-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const activeCount = document.querySelectorAll('.type-chip.active').length;
+    if (chip.classList.contains('active') && activeCount === 1) {
+      announce('최소 한 가지 유형은 선택해야 해요');
+      return;
+    }
+    chip.classList.toggle('active');
+    chip.setAttribute('aria-pressed', chip.classList.contains('active') ? 'true' : 'false');
+    State.quizTypes = Array.from(document.querySelectorAll('.type-chip.active'))
+      .map(c => c.dataset.type);
+  });
+});
+
 document.getElementById('btn-setup-back').addEventListener('click', () => showScreen('home'));
 
 document.getElementById('btn-start-quiz-go').addEventListener('click', async () => {
@@ -2220,7 +2288,7 @@ document.getElementById('btn-start-quiz-go').addEventListener('click', async () 
   btn.textContent = '문제 만드는 중…';
 
   try {
-    const questions = await SnapEngine.buildQuiz({ scope, group, count });
+    const questions = await SnapEngine.buildQuiz({ scope, group, count, types: State.quizTypes });
     State.currentQuiz  = questions;
     State.quizIndex    = 0;
     State.wrongWords   = [];
@@ -2429,6 +2497,7 @@ document.getElementById('btn-retry').addEventListener('click', async () => {
       scope: State.quizScope,
       group: State.quizGroup,
       count: State.currentQuiz.length,
+      types: State.quizTypes,
     });
     State.currentQuiz  = questions;
     State.quizIndex    = 0;
@@ -2450,6 +2519,7 @@ document.getElementById('btn-retry-review').addEventListener('click', async () =
     const questions = await SnapEngine.buildQuiz({
       scope: 'review',
       count: State.currentQuiz.length,
+      types: State.quizTypes,
     });
     State.currentQuiz  = questions;
     State.quizIndex    = 0;

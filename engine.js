@@ -801,7 +801,13 @@ If there are no vocabulary words in the image, return an empty array: []`;
       case 'D': {
         // Synonym or antonym question — pick the WORD
         const useSyn  = word.syn && (!word.ant || Math.random() < 0.5);
-        const relWord = useSyn ? word.syn : word.ant;
+        const relRaw  = useSyn ? word.syn : word.ant;
+        // syn/ant may hold several comma-separated words (e.g. "crevice, split").
+        // Show only one so the prompt reads naturally.
+        const relOpts = relRaw.split(',').map(s => s.trim()).filter(Boolean);
+        const relWord = relOpts.length
+          ? relOpts[Math.floor(Math.random() * relOpts.length)]
+          : relRaw.trim();
         const relLabel = useSyn ? '유의어(synonym)' : '반의어(antonym)';
         promptText        = `"${relWord}"의 ${relLabel}`;
         promptLabel       = '다음에 맞는 단어를 고르세요:';
