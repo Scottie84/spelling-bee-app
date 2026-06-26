@@ -547,6 +547,14 @@
     }
     .confirm-summary .summary-text {
       flex: 1;
+      min-width: 0;
+    }
+    /* The shared .btn-secondary is width:100%; keep it from squashing the
+       summary text inside this flex row. */
+    .confirm-summary #btn-add-word-row {
+      width: auto;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
     .confirm-summary h2 {
       font-size: var(--fs-md);
@@ -638,6 +646,68 @@
       flex-shrink: 0;
     }
     .btn-delete-row:hover { background: #FFD0D2; }
+
+    /* --- Auto-verification (image cross-check) --- */
+    .verify-banner {
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .verify-banner.running { background: var(--purple-light); color: var(--purple); }
+    .verify-banner.ok      { background: var(--green-light);  color: #028f6b; }
+    .verify-banner.warn    { background: var(--red-light);    color: #c0373b; }
+    .verify-banner.failed  { background: #F1F1F4;             color: var(--text-sub); }
+    .verify-banner .mini-spinner {
+      width: 18px; height: 18px;
+      border: 3px solid var(--purple-light);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      flex-shrink: 0;
+    }
+    .verify-missing-row { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .verify-missing-chip {
+      border: 0;
+      background: var(--surface);
+      color: var(--purple);
+      border: 1px solid var(--purple);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .verify-missing-chip:hover { background: var(--purple); color: #fff; }
+
+    .verify-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .verify-badge.ok      { background: var(--green-light); color: #028f6b; }
+    .verify-badge.spelling{ background: var(--yellow);      color: var(--text-main); }
+    .verify-badge.missing { background: var(--red-light);   color: #c0373b; }
+    .verify-badge .btn-fix {
+      border: 0;
+      background: var(--yellow-dark);
+      color: #fff;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: var(--fs-sm);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .verify-badge .btn-fix:hover { filter: brightness(1.05); }
 
     .group-input-row {
       display: flex;
@@ -1369,6 +1439,8 @@
       <button class="btn-secondary sm" id="btn-add-word-row" aria-label="단어 행 추가">+ 추가</button>
     </div>
 
+    <div id="verify-banner" class="verify-banner hidden" role="status" aria-live="polite"></div>
+
     <div id="confirm-word-list" aria-label="추출된 단어 목록"></div>
 
     <div class="group-input-row card">
@@ -1579,6 +1651,9 @@ const State = {
   wrongWords: [],               // { word, meaning } for result screen
   correctCount: 0,
   pendingWords: [],             // PartialWord[] waiting to be confirmed
+  verifyState: 'idle',          // 'idle' | 'running' | 'done' | 'failed'
+  verifyChecked: [],            // [{ word, status, suggestion }] from verifyExtraction
+  verifyMissing: [],            // string[] words seen in image but not extracted
   editWordId: null,             // id of word open in modal
 };
 
@@ -1859,9 +1934,174 @@ document.getElementById('btn-manual-entry').addEventListener('click', () => {
 ============================================================= */
 function openConfirmScreen(words) {
   State.pendingWords = words.map(w => ({ ...w }));
+  State.verifyState   = 'idle';
+  State.verifyChecked = [];
+  State.verifyMissing = [];
   renderConfirmList();
+  renderVerifyBanner();
   setDefaultGroupName();
   showScreen('confirm');
+  maybeRunVerification(words);
+}
+
+// Fire-and-forget second-pass check: does each extracted word really appear in
+// the photo (and spelled right)? Annotates the confirm cards as results arrive.
+// Skipped for manual entry (no source image / no real words). Never blocks saving.
+async function maybeRunVerification(words) {
+  const hasRealWord = Array.isArray(words) && words.some(w => w && w.word && w.word.trim());
+  if (!_lastFileUrl || !hasRealWord) return;
+
+  State.verifyState = 'running';
+  renderVerifyBanner();
+
+  try {
+    const res = await SnapEngine.verifyExtraction(_lastFileUrl, words);
+    State.verifyChecked = res.checked || [];
+    State.verifyMissing = res.missing || [];
+    State.verifyState   = 'done';
+  } catch (err) {
+    console.warn('[verify] failed:', err.message);
+    State.verifyState = 'failed';
+  }
+  renderVerifyBanner();
+  applyCardBadges();
+}
+
+// Render the summary banner above the word list based on State.verify*.
+function renderVerifyBanner() {
+  const el = document.getElementById('verify-banner');
+  if (!el) return;
+  el.className = 'verify-banner';
+  el.innerHTML = '';
+
+  if (State.verifyState === 'idle') {
+    el.classList.add('hidden');
+    return;
+  }
+
+  if (State.verifyState === 'running') {
+    el.classList.add('running');
+    el.innerHTML = '<span class="mini-spinner" aria-hidden="true"></span> 사진과 대조해 자동 검증 중…';
+    return;
+  }
+
+  if (State.verifyState === 'failed') {
+    el.classList.add('failed');
+    el.textContent = '🔍 자동 검증을 건너뛰었어요 (모델 혼잡). 단어를 직접 확인해 주세요.';
+    return;
+  }
+
+  // done
+  const checked  = State.verifyChecked || [];
+  const issues   = checked.filter(c => c.status !== 'ok');
+  const missing  = State.verifyMissing || [];
+
+  if (issues.length === 0 && missing.length === 0) {
+    el.classList.add('ok');
+    el.textContent = `✅ 모든 단어(${checked.length}개)가 사진과 일치해요!`;
+    return;
+  }
+
+  el.classList.add('warn');
+  const spellingN = issues.filter(c => c.status === 'spelling').length;
+  const notInN    = issues.filter(c => c.status === 'not_in_image').length;
+  const parts = [];
+  if (spellingN) parts.push(`철자 의심 ${spellingN}개`);
+  if (notInN)    parts.push(`사진에서 못 찾음 ${notInN}개`);
+  if (missing.length) parts.push(`누락 의심 ${missing.length}개`);
+
+  const summary = document.createElement('span');
+  summary.textContent = `⚠️ 확인이 필요해요 — ${parts.join(', ')}. 아래 표시를 확인해 주세요.`;
+  el.appendChild(summary);
+
+  if (missing.length) {
+    const row = document.createElement('div');
+    row.className = 'verify-missing-row';
+    const label = document.createElement('span');
+    label.textContent = '누락된 단어 추가:';
+    row.appendChild(label);
+    missing.forEach(m => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'verify-missing-chip';
+      chip.textContent = `+ ${m}`;
+      chip.addEventListener('click', () => addMissingWord(m, chip));
+      row.appendChild(chip);
+    });
+    el.appendChild(row);
+  }
+}
+
+// Decorate each word card with a ✅ / ⚠️ / ❌ badge, matched by word text.
+function applyCardBadges() {
+  if (State.verifyState !== 'done') return;
+  const byWord = new Map();
+  (State.verifyChecked || []).forEach(c => byWord.set((c.word || '').trim().toLowerCase(), c));
+
+  document.querySelectorAll('#confirm-word-list .word-edit-card').forEach(card => {
+    const top = card.querySelector('.card-top');
+    if (!top) return;
+    const old = top.querySelector('.verify-badge');
+    if (old) old.remove();
+
+    const idx = card.getAttribute('data-index');
+    const w = State.pendingWords[idx];
+    const res = w && byWord.get((w.word || '').trim().toLowerCase());
+    if (!res) return;
+
+    const badge = document.createElement('span');
+    badge.className = 'verify-badge ' + (res.status === 'ok' ? 'ok' : res.status === 'spelling' ? 'spelling' : 'missing');
+
+    if (res.status === 'ok') {
+      badge.textContent = '✅ 일치';
+    } else if (res.status === 'spelling') {
+      const txt = document.createElement('span');
+      txt.textContent = res.suggestion ? `⚠️ 철자? → ${res.suggestion}` : '⚠️ 철자 의심';
+      badge.appendChild(txt);
+      if (res.suggestion) {
+        const fix = document.createElement('button');
+        fix.type = 'button';
+        fix.className = 'btn-fix';
+        fix.textContent = '고치기';
+        fix.addEventListener('click', () => fixSpelling(idx, res.suggestion));
+        badge.appendChild(fix);
+      }
+    } else {
+      badge.textContent = '❌ 사진에 없음';
+    }
+    // Insert the badge before the delete button so layout stays tidy.
+    top.insertBefore(badge, top.querySelector('.btn-delete-row'));
+  });
+}
+
+// Apply a suggested spelling fix to a pending word + its input.
+function fixSpelling(idx, suggestion) {
+  const w = State.pendingWords[idx];
+  if (!w) return;
+  w.word = suggestion;
+  const input = document.getElementById('w-word-' + idx);
+  if (input) input.value = suggestion;
+  // Mark this word as resolved so the badge updates.
+  const key = suggestion.trim().toLowerCase();
+  State.verifyChecked = (State.verifyChecked || []).map(c =>
+    c.status === 'spelling' && c.suggestion && c.suggestion.trim().toLowerCase() === key
+      ? { ...c, word: suggestion, status: 'ok', suggestion: '' }
+      : c);
+  renderVerifyBanner();
+  applyCardBadges();
+}
+
+// Append a missing word as a new editable row (word only; user fills the rest).
+function addMissingWord(word, chip) {
+  State.pendingWords.push({ word, pos:'', meaning:'', example:'', syn:'', ant:'' });
+  // It's now accounted for; treat as verified-ok and drop from missing.
+  State.verifyChecked = [...(State.verifyChecked || []), { word, status:'ok', suggestion:'' }];
+  State.verifyMissing = (State.verifyMissing || []).filter(m => m.trim().toLowerCase() !== word.trim().toLowerCase());
+  renderConfirmList();
+  renderVerifyBanner();
+  applyCardBadges();
+  if (chip) chip.remove();
+  announce(`${word} 단어를 추가했어요. 뜻을 입력해 주세요.`);
 }
 
 function setDefaultGroupName() {
@@ -1926,6 +2166,9 @@ function renderConfirmList() {
 
   // Update count label
   document.getElementById('confirm-word-count-label').textContent = `단어 ${State.pendingWords.length}개`;
+
+  // Re-decorate with verification badges if results are already in.
+  applyCardBadges();
 }
 
 // Delegate input changes → update State.pendingWords

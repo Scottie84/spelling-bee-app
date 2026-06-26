@@ -661,6 +661,202 @@ If there are no vocabulary words in the image, return an empty array: []`;
   }
 
   // ---------------------------------------------------------------------------
+  // verifyExtraction — second-pass check that extracted words match the image
+  // ---------------------------------------------------------------------------
+
+  const VERIFY_SYSTEM_PROMPT = `You are an OCR verifier for children's English word books.
+You are given an image of a word-book page and a JSON array of words that were extracted from it.
+Check each extracted word AGAINST THE IMAGE and report problems.
+Return STRICT JSON ONLY — no markdown fences, no prose before or after — an object with exactly:
+{
+  "checked": [ { "word": "<the extracted word, unchanged>", "status": "ok" | "spelling" | "not_in_image", "suggestion": "<corrected spelling if status is spelling, else empty string>" } ],
+  "missing": [ "<english vocabulary words clearly visible in the image but NOT in the extracted list>" ]
+}
+Rules:
+- status "ok": the word appears in the image and is spelled correctly.
+- status "spelling": the word appears in the image but is misspelled in the list; put the correct spelling in "suggestion".
+- status "not_in_image": you cannot find this word anywhere in the image.
+- "checked" MUST contain exactly one entry per extracted word, in the same order as given.
+- "missing" lists only clear vocabulary words left out; use an empty array if none.`;
+
+  /**
+   * Verify that extracted words actually appear in the image (and are spelled
+   * right), and surface any words the extractor missed.
+   * @param {string} dataUrlOrBase64 — the same image used for extraction
+   * @param {Array<{word:string}>|string[]} words — extracted words (objects or plain strings)
+   * @param {object} [opts]
+   * @returns {Promise<{checked: Array<{word,status,suggestion}>, missing: string[], modelUsed: string}>}
+   */
+  async function verifyExtraction(dataUrlOrBase64, words, opts = {}) {
+    const maxTokens = opts.maxTokens || 800;
+
+    const wordList = (words || [])
+      .map(w => (typeof w === 'string' ? w : (w && w.word) || ''))
+      .map(w => String(w).trim())
+      .filter(Boolean);
+
+    if (wordList.length === 0) {
+      return { checked: [], missing: [], modelUsed: 'none' };
+    }
+
+    let imageUrl = dataUrlOrBase64;
+    if (!imageUrl.startsWith('data:')) {
+      imageUrl = `data:image/png;base64,${imageUrl}`;
+    }
+
+    // No client-side key → go through the serverless proxy (same as extraction).
+    if (!_apiKey) {
+      return _verifyViaServer(imageUrl, wordList, maxTokens);
+    }
+
+    const userMessage = [
+      {
+        type: 'text',
+        text: `Verify these extracted words against the image. Extracted words (JSON): ${JSON.stringify(wordList)}`,
+      },
+      { type: 'image_url', image_url: { url: imageUrl } },
+    ];
+
+    const errors = [];
+
+    for (const model of VISION_MODELS) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+      try {
+        const resp = await fetch(OPENROUTER_ENDPOINT, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${_apiKey}`,
+            'HTTP-Referer':  'https://snapquiz.local',
+            'X-Title':       'SnapQuiz',
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: maxTokens,
+            messages: [
+              { role: 'system', content: VERIFY_SYSTEM_PROMPT },
+              { role: 'user',   content: userMessage },
+            ],
+          }),
+        });
+
+        clearTimeout(timer);
+
+        if (!resp.ok) {
+          const body = await resp.text().catch(() => '');
+          throw new Error(`HTTP ${resp.status}: ${body.slice(0, 200)}`);
+        }
+
+        const json = await resp.json();
+        if (json.error) {
+          throw new Error(`Model error: ${JSON.stringify(json.error).slice(0, 200)}`);
+        }
+
+        const raw = (json.choices?.[0]?.message?.content || '').trim();
+        if (!raw) throw new Error('Empty response from model');
+
+        const verdict = _parseVerdict(raw, wordList);
+        if (!verdict) throw new Error('Could not parse verdict from model response');
+
+        return { ...verdict, modelUsed: model };
+
+      } catch (err) {
+        clearTimeout(timer);
+        const msg = err.name === 'AbortError' ? 'Timeout after 60 s' : err.message;
+        console.warn(`[SnapEngine] verifyExtraction: ${model} failed — ${msg}`);
+        errors.push(`${model}: ${msg}`);
+      }
+    }
+
+    throw new Error(`[SnapEngine] verifyExtraction: all models failed.\n${errors.join('\n')}`);
+  }
+
+  /** Server-side verification path (no key on the client). POSTs to /api/verify. */
+  async function _verifyViaServer(imageUrl, wordList, maxTokens) {
+    const endpoint = (global.SNAP_CONFIG && global.SNAP_CONFIG.verifyBase) || '/api/verify';
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: imageUrl, words: wordList, maxTokens }),
+      });
+      clearTimeout(timer);
+      if (!resp.ok) {
+        const body = await resp.text().catch(() => '');
+        throw new Error(`서버 검증 실패 (HTTP ${resp.status}): ${body.slice(0, 200)}`);
+      }
+      const json = await resp.json();
+      if (json.error) throw new Error(json.error);
+      return {
+        checked: json.checked || [],
+        missing: json.missing || [],
+        modelUsed: json.modelUsed || 'server',
+      };
+    } catch (err) {
+      clearTimeout(timer);
+      if (err.name === 'AbortError') throw new Error('서버 응답 시간 초과 (60초)');
+      throw err;
+    }
+  }
+
+  /**
+   * Parse the verifier's JSON object into a normalised verdict.
+   * Aligns the "checked" list back to the words we asked about so the caller can
+   * trust there is exactly one entry per input word, in order.
+   */
+  function _parseVerdict(raw, wordList) {
+    let text = raw.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+    const start = text.indexOf('{');
+    const end   = text.lastIndexOf('}');
+    if (start === -1 || end === -1 || end < start) return null;
+    text = text.slice(start, end + 1);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (_) {
+      return null;
+    }
+    if (!parsed || typeof parsed !== 'object') return null;
+
+    const VALID = new Set(['ok', 'spelling', 'not_in_image']);
+    const rawChecked = Array.isArray(parsed.checked) ? parsed.checked : [];
+
+    // Index the model's verdicts by normalised word so we can realign to our list.
+    const byWord = new Map();
+    for (const item of rawChecked) {
+      if (!item || typeof item !== 'object') continue;
+      const key = _norm(item.word);
+      if (key) byWord.set(key, item);
+    }
+
+    const checked = wordList.map(w => {
+      const hit = byWord.get(_norm(w));
+      const status = hit && VALID.has(hit.status) ? hit.status : 'ok';
+      return {
+        word: w,
+        status,
+        suggestion: status === 'spelling' && hit && hit.suggestion
+          ? String(hit.suggestion).trim()
+          : '',
+      };
+    });
+
+    const inputSet = new Set(wordList.map(_norm));
+    const missing = (Array.isArray(parsed.missing) ? parsed.missing : [])
+      .map(m => String(m || '').trim())
+      .filter(m => m && !inputSet.has(_norm(m)));
+
+    return { checked, missing };
+  }
+
+  // ---------------------------------------------------------------------------
   // buildQuiz
   // ---------------------------------------------------------------------------
 
@@ -891,6 +1087,7 @@ If there are no vocabulary words in the image, return an empty array: []`;
     exportJSON,
     importJSON,
     extractWordsFromImage,
+    verifyExtraction,
     buildQuiz,
     recordAnswer,
   };
