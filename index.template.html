@@ -1160,6 +1160,17 @@
     }
     .choice-btn:disabled { cursor: not-allowed; }
 
+    /* Picked but not yet graded */
+    .choice-btn.selected {
+      border-color: var(--purple);
+      background: var(--purple-light);
+    }
+    .choice-btn.selected .choice-label {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: #fff;
+    }
+
     .choice-btn .choice-label {
       width: 32px; height: 32px;
       border-radius: 50%;
@@ -1697,6 +1708,10 @@
       <div class="feedback-text" id="feedback-text"></div>
     </div>
 
+    <button class="btn-primary hidden" id="btn-check-answer" disabled>
+      정답 확인 ✓
+    </button>
+
     <button class="btn-primary hidden" id="btn-next-question">
       다음 문제 →
     </button>
@@ -1744,6 +1759,7 @@ const State = {
   rewards: true,                // toggle-able
   currentQuiz: [],              // Question[]
   quizIndex: 0,
+  selectedChoice: null,         // picked-but-not-yet-graded choice index
   quizScope: 'all',
   quizGroup: null,
   quizCount: 10,
@@ -2801,12 +2817,16 @@ function renderQuestion() {
       <span class="choice-text">${esc(choice)}</span>
     `;
     btn.setAttribute('aria-label', `보기 ${CHOICE_ABC[i]}: ${choice}`);
-    btn.addEventListener('click', () => onChoicePick(i));
+    btn.addEventListener('click', () => selectChoice(i));
     choicesEl.appendChild(btn);
   });
 
-  // Hide feedback & next button
+  // Reset selection; show the (disabled) check button, hide feedback & next
+  State.selectedChoice = null;
   resetQuizFeedback();
+  const checkBtn = document.getElementById('btn-check-answer');
+  checkBtn.classList.remove('hidden');
+  checkBtn.disabled = true;
   document.getElementById('btn-next-question').classList.add('hidden');
 
   // Scroll to top
@@ -2822,13 +2842,31 @@ function resetQuizFeedback() {
   });
 }
 
-async function onChoicePick(chosenIdx) {
+// Step 1: pick a choice (highlight only, no grading yet — avoids mis-taps)
+function selectChoice(chosenIdx) {
+  State.selectedChoice = chosenIdx;
+  document.querySelectorAll('.choice-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i === chosenIdx);
+  });
+  document.getElementById('btn-check-answer').disabled = false;
+}
+
+// Step 2: confirm the picked choice and grade it
+async function gradeAnswer() {
+  const chosenIdx = State.selectedChoice;
+  if (chosenIdx == null) return;
+
   const q       = State.currentQuiz[State.quizIndex];
   const correct = chosenIdx === q.answerIndex;
 
-  // Disable all buttons
+  // Hide the check button; lock in the answer
+  const checkBtn = document.getElementById('btn-check-answer');
+  checkBtn.classList.add('hidden');
+  checkBtn.disabled = true;
+
+  // Disable all buttons & clear the pending-selection highlight
   const btns = document.querySelectorAll('.choice-btn');
-  btns.forEach(b => { b.disabled = true; });
+  btns.forEach(b => { b.disabled = true; b.classList.remove('selected'); });
 
   // Color feedback
   btns.forEach((btn, i) => {
@@ -2875,6 +2913,10 @@ function showQuizFeedback(correct) {
   emojiEl.style.display = 'block';
   textEl.style.display  = 'block';
 }
+
+document.getElementById('btn-check-answer').addEventListener('click', () => {
+  gradeAnswer();
+});
 
 document.getElementById('btn-next-question').addEventListener('click', () => {
   State.quizIndex++;
