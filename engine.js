@@ -1041,9 +1041,14 @@ Rules:
         break;
 
       case 'C': {
-        // Blank the word in the example sentence, pick the WORD
+        // Blank the word in the example sentence, pick the WORD.
+        // Match inflected forms too (invested/investing/...), longest first
+        // so the whole word is blanked rather than leaving a stray suffix.
         const blank = '____';
-        const re    = new RegExp(`\\b${_escapeRegex(word.word)}\\b`, 'gi');
+        const variants = _inflections(word.word)
+          .sort((a, b) => b.length - a.length)
+          .map(_escapeRegex);
+        const re     = new RegExp(`\\b(?:${variants.join('|')})\\b`, 'gi');
         const filled = word.example.replace(re, blank);
         promptText        = filled || `${blank}: ${word.meaning}`;
         promptLabel       = '빈칸에 알맞은 단어를 고르세요:';
@@ -1111,6 +1116,46 @@ Rules:
 
   function _escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // Surface forms of a base word so the C-type blank also matches inflected
+  // forms in the example (invest -> invested/investing/invests, etc.).
+  function _inflections(base) {
+    const w = (base || '').trim();
+    if (!w) return [];
+    const lower = w.toLowerCase();
+    const forms = new Set([w]);
+    const add = s => { if (s && s.length > 1) forms.add(s); };
+    const isVowel = c => 'aeiou'.includes(c);
+    const last = lower[lower.length - 1];
+    const prev = lower[lower.length - 2];
+
+    add(w + 's');
+    add(w + 'es');
+    add(w + 'ed');
+    add(w + 'd');
+    add(w + 'ing');
+
+    if (last === 'e') {                       // use -> using/used
+      const stem = w.slice(0, -1);
+      add(stem + 'ing');
+      add(stem + 'ed');
+    }
+    if (last === 'y' && prev && !isVowel(prev)) {  // try -> tries/tried
+      const stem = w.slice(0, -1);
+      add(stem + 'ies');
+      add(stem + 'ied');
+    }
+    if (lower.length >= 3) {                   // stop -> stopped/stopping
+      const c1 = lower[lower.length - 3];
+      const v  = lower[lower.length - 2];
+      const c2 = lower[lower.length - 1];
+      if (!isVowel(c1) && isVowel(v) && !isVowel(c2) && !'wxy'.includes(c2)) {
+        add(w + c2 + 'ed');
+        add(w + c2 + 'ing');
+      }
+    }
+    return Array.from(forms);
   }
 
   // ---------------------------------------------------------------------------
