@@ -1,0 +1,3161 @@
+{
+  "source": "폴리 2학년 스펠링비 (Vocabulary Check-Up)",
+  "chapters": [
+    {
+      "chapter": 13,
+      "wordBank": [
+        "steady",
+        "tide",
+        "value",
+        "adventurous",
+        "bonus",
+        "pale"
+      ],
+      "problems": [
+        {
+          "id": "c13-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "The performance really ____, so the audience stood up and clapped loudly.",
+          "underlined": null,
+          "choices": [
+            "sizzled",
+            "dribbled",
+            "allowed",
+            "scraped"
+          ],
+          "answer": "sizzled"
+        },
+        {
+          "id": "c13-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "Owls have a(n) ____ that lets them see at night.",
+          "underlined": null,
+          "choices": [
+            "gale",
+            "value",
+            "adaptation",
+            "currency"
+          ],
+          "answer": "adaptation"
+        },
+        {
+          "id": "c13-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "The fancy hotel room has soft sheets that are made of ____.",
+          "underlined": null,
+          "choices": [
+            "tide",
+            "satin",
+            "feature",
+            "crew"
+          ],
+          "answer": "satin"
+        },
+        {
+          "id": "c13-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "My parents ____ my old clothes in the closet for my brother to wear when he is older.",
+          "underlined": null,
+          "choices": [
+            "stored",
+            "signaled",
+            "soared",
+            "allowed"
+          ],
+          "answer": "stored"
+        },
+        {
+          "id": "c13-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "Martin ____ the ball, so it didn't hit him.",
+          "underlined": null,
+          "choices": [
+            "shrank",
+            "guided",
+            "signed",
+            "dodged"
+          ],
+          "answer": "dodged"
+        },
+        {
+          "id": "c13-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "Vacuum cleaners use ____ to pick up dust and dirt.",
+          "underlined": null,
+          "choices": [
+            "bonuses",
+            "suction",
+            "crews",
+            "packs"
+          ],
+          "answer": "suction"
+        },
+        {
+          "id": "c13-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "The weatherman said to stay inside due to the strong winds of the ____.",
+          "underlined": null,
+          "choices": [
+            "crew",
+            "gale",
+            "value",
+            "currency"
+          ],
+          "answer": "gale"
+        },
+        {
+          "id": "c13-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "Jeff tried to ____ the sticker off the window, but it wouldn't come off.",
+          "underlined": null,
+          "choices": [
+            "signal",
+            "allow",
+            "scrape",
+            "guide"
+          ],
+          "answer": "scrape"
+        },
+        {
+          "id": "c13-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "A flock of birds ____ high above the clouds as they headed south.",
+          "underlined": null,
+          "choices": [
+            "soared",
+            "dribbled",
+            "signed",
+            "stored"
+          ],
+          "answer": "soared"
+        },
+        {
+          "id": "c13-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "The rabbit ran quickly to escape from the ____ of wolves.",
+          "underlined": null,
+          "choices": [
+            "value",
+            "bonus",
+            "currency",
+            "pack"
+          ],
+          "answer": "pack"
+        },
+        {
+          "id": "c13-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "Everyone thought the knight was brave for fighting the dragon.",
+          "underlined": "brave",
+          "choices": [
+            "stingy",
+            "weird",
+            "courageous",
+            "pale"
+          ],
+          "answer": "courageous"
+        },
+        {
+          "id": "c13-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "Mr. Venkman will lead us on a tour of our new school tomorrow.",
+          "underlined": "lead",
+          "choices": [
+            "store",
+            "guide",
+            "dribble",
+            "soar"
+          ],
+          "answer": "guide"
+        },
+        {
+          "id": "c13-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "People use money to buy items that they want or need.",
+          "underlined": "money",
+          "choices": [
+            "currency",
+            "danger",
+            "crew",
+            "gale"
+          ],
+          "answer": "currency"
+        },
+        {
+          "id": "c13-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "John wants to buy a smartphone with many special qualities.",
+          "underlined": "qualities",
+          "choices": [
+            "dangers",
+            "adaptations",
+            "features",
+            "tides"
+          ],
+          "answer": "features"
+        },
+        {
+          "id": "c13-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "full of excitement or danger",
+          "underlined": null,
+          "choices": [],
+          "answer": "adventurous"
+        },
+        {
+          "id": "c13-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "not shaking or moving",
+          "underlined": null,
+          "choices": [],
+          "answer": "steady"
+        },
+        {
+          "id": "c13-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "a regular rise and fall in the water level of the sea",
+          "underlined": null,
+          "choices": [],
+          "answer": "tide"
+        },
+        {
+          "id": "c13-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "something given or paid in addition to what is usual or expected",
+          "underlined": null,
+          "choices": [],
+          "answer": "bonus"
+        },
+        {
+          "id": "c13-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "having little color",
+          "underlined": null,
+          "choices": [],
+          "answer": "pale"
+        },
+        {
+          "id": "c13-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "the amount of money that can be received for something",
+          "underlined": null,
+          "choices": [],
+          "answer": "value"
+        }
+      ]
+    },
+    {
+      "chapter": 14,
+      "wordBank": [
+        "suite",
+        "ritual",
+        "courageous",
+        "ballroom",
+        "dribble",
+        "extremely"
+      ],
+      "problems": [
+        {
+          "id": "c14-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "The ____ was so strong that it made the windows shake.",
+          "underlined": null,
+          "choices": [
+            "satin",
+            "gale",
+            "ritual",
+            "ballroom"
+          ],
+          "answer": "gale"
+        },
+        {
+          "id": "c14-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "The tall tower is a famous ____ that you can see from all over the city.",
+          "underlined": null,
+          "choices": [
+            "trim",
+            "crew",
+            "ballroom",
+            "landmark"
+          ],
+          "answer": "landmark"
+        },
+        {
+          "id": "c14-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "Steve went on a(n) ____ trip through the wild jungle.",
+          "underlined": null,
+          "choices": [
+            "pale",
+            "steady",
+            "adventurous",
+            "formal"
+          ],
+          "answer": "adventurous"
+        },
+        {
+          "id": "c14-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "The ____ of the International Space Station is made up of astronauts from different countries.",
+          "underlined": null,
+          "choices": [
+            "crew",
+            "satin",
+            "attraction",
+            "site"
+          ],
+          "answer": "crew"
+        },
+        {
+          "id": "c14-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "We could hear the church bells ringing at the small ____ on the hill.",
+          "underlined": null,
+          "choices": [
+            "suite",
+            "chapel",
+            "trim",
+            "satin"
+          ],
+          "answer": "chapel"
+        },
+        {
+          "id": "c14-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "The empty lot is going to be the ____ of a new office building.",
+          "underlined": null,
+          "choices": [
+            "trim",
+            "site",
+            "ceremony",
+            "ballroom"
+          ],
+          "answer": "site"
+        },
+        {
+          "id": "c14-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "We saw many ____ bugs that we had never seen before at the special zoo exhibit.",
+          "underlined": null,
+          "choices": [
+            "steady",
+            "grand",
+            "elegant",
+            "weird"
+          ],
+          "answer": "weird"
+        },
+        {
+          "id": "c14-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "My parents will wear fancy clothes to the ____ party tonight.",
+          "underlined": null,
+          "choices": [
+            "pale",
+            "courageous",
+            "formal",
+            "steady"
+          ],
+          "answer": "formal"
+        },
+        {
+          "id": "c14-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "My family knows how to ____ because my older brother is deaf.",
+          "underlined": null,
+          "choices": [
+            "dodge",
+            "soar",
+            "sign",
+            "dribble"
+          ],
+          "answer": "sign"
+        },
+        {
+          "id": "c14-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "A(n) ____ is held each year to honor the soldiers who died fighting for our country.",
+          "underlined": null,
+          "choices": [
+            "ceremony",
+            "suite",
+            "attraction",
+            "trim"
+          ],
+          "answer": "ceremony"
+        },
+        {
+          "id": "c14-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "Reading the book was boring, so I put it down and took a nap.",
+          "underlined": "boring",
+          "choices": [
+            "weird",
+            "amusing",
+            "formal",
+            "elegant"
+          ],
+          "answer": "amusing"
+        },
+        {
+          "id": "c14-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "The balloon suddenly popped and began to drop.",
+          "underlined": "drop",
+          "choices": [
+            "guard",
+            "soar",
+            "dribble",
+            "sizzle"
+          ],
+          "answer": "soar"
+        },
+        {
+          "id": "c14-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "I was nervous about performing in the school play, so my hands were shaky.",
+          "underlined": "shaky",
+          "choices": [
+            "pale",
+            "weird",
+            "steady",
+            "formal"
+          ],
+          "answer": "steady"
+        },
+        {
+          "id": "c14-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "I want to buy some new clothes because my old ones are unfashionable.",
+          "underlined": "unfashionable",
+          "choices": [
+            "courageous",
+            "adventurous",
+            "elegant",
+            "pale"
+          ],
+          "answer": "elegant"
+        },
+        {
+          "id": "c14-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "a large room for dancing",
+          "underlined": null,
+          "choices": [],
+          "answer": "ballroom"
+        },
+        {
+          "id": "c14-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "to move a ball forward by bouncing, tapping, or kicking it",
+          "underlined": null,
+          "choices": [],
+          "answer": "dribble"
+        },
+        {
+          "id": "c14-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "very brave",
+          "underlined": null,
+          "choices": [],
+          "answer": "courageous"
+        },
+        {
+          "id": "c14-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "a series of acts that is always performed in the same way, especially for an important or religious occasion",
+          "underlined": null,
+          "choices": [],
+          "answer": "ritual"
+        },
+        {
+          "id": "c14-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "very",
+          "underlined": null,
+          "choices": [],
+          "answer": "extremely"
+        },
+        {
+          "id": "c14-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "several rooms that are connected",
+          "underlined": null,
+          "choices": [],
+          "answer": "suite"
+        }
+      ]
+    },
+    {
+      "chapter": 15,
+      "wordBank": [
+        "elegant",
+        "possess",
+        "crew",
+        "adventurous",
+        "breath",
+        "knot"
+      ],
+      "problems": [
+        {
+          "id": "c15-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "Tony's sneakers made a loud ____ on the tile floor.",
+          "underlined": null,
+          "choices": [
+            "squeak",
+            "knot",
+            "awe",
+            "crew"
+          ],
+          "answer": "squeak"
+        },
+        {
+          "id": "c15-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "Our dance will be held in the ____ next to the museum.",
+          "underlined": null,
+          "choices": [
+            "ritual",
+            "breath",
+            "cue",
+            "ballroom"
+          ],
+          "answer": "ballroom"
+        },
+        {
+          "id": "c15-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "Mom told me to hold onto the rail while I climbed the ____ stairs.",
+          "underlined": null,
+          "choices": [
+            "steep",
+            "calm",
+            "flustered",
+            "steady"
+          ],
+          "answer": "steep"
+        },
+        {
+          "id": "c15-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "Tommy was ____ during the test because he knew all of the answers.",
+          "underlined": null,
+          "choices": [
+            "elegant",
+            "flustered",
+            "calm",
+            "steep"
+          ],
+          "answer": "calm"
+        },
+        {
+          "id": "c15-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "Washington, D.C., is home to many famous ____, such as the White House.",
+          "underlined": null,
+          "choices": [
+            "cues",
+            "landmarks",
+            "ceremonies",
+            "knots"
+          ],
+          "answer": "landmarks"
+        },
+        {
+          "id": "c15-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "The crowd was in ____ during the amazing fireworks show.",
+          "underlined": null,
+          "choices": [
+            "cue",
+            "crew",
+            "awe",
+            "suite"
+          ],
+          "answer": "awe"
+        },
+        {
+          "id": "c15-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "While the president spoke, the interpreter ____ so that deaf people could understand.",
+          "underlined": null,
+          "choices": [
+            "inspired",
+            "possessed",
+            "sizzled",
+            "signed"
+          ],
+          "answer": "signed"
+        },
+        {
+          "id": "c15-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "I will ____ the rotten food in the refrigerator.",
+          "underlined": null,
+          "choices": [
+            "mess up",
+            "guide",
+            "sizzle",
+            "get rid of"
+          ],
+          "answer": "get rid of"
+        },
+        {
+          "id": "c15-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "The race-car driver barely ____ the crash in front of him.",
+          "underlined": null,
+          "choices": [
+            "sizzled",
+            "dodged",
+            "inspired",
+            "recited"
+          ],
+          "answer": "dodged"
+        },
+        {
+          "id": "c15-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "We used a map to ____ ourselves around the city.",
+          "underlined": null,
+          "choices": [
+            "mess up",
+            "get rid of",
+            "guide",
+            "sizzle"
+          ],
+          "answer": "guide"
+        },
+        {
+          "id": "c15-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "The beeping sound is the signal for you to start the race.",
+          "underlined": "signal",
+          "choices": [
+            "crew",
+            "cue",
+            "knot",
+            "breath"
+          ],
+          "answer": "cue"
+        },
+        {
+          "id": "c15-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "My older sister wore a fancy dress to the New Year's Eve party.",
+          "underlined": "fancy",
+          "choices": [
+            "calm",
+            "steady",
+            "formal",
+            "flustered"
+          ],
+          "answer": "formal"
+        },
+        {
+          "id": "c15-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "The pilot kept the plane stable during the storm.",
+          "underlined": "stable",
+          "choices": [
+            "formal",
+            "adventurous",
+            "steep",
+            "steady"
+          ],
+          "answer": "steady"
+        },
+        {
+          "id": "c15-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "The documentary about lemurs was so interesting that I couldn't stop watching it.",
+          "underlined": "interesting",
+          "choices": [
+            "calm",
+            "fascinating",
+            "elegant",
+            "extremely"
+          ],
+          "answer": "fascinating"
+        },
+        {
+          "id": "c15-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "a group of people who work on a ship or airplane",
+          "underlined": null,
+          "choices": [],
+          "answer": "crew"
+        },
+        {
+          "id": "c15-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "to own or have",
+          "underlined": null,
+          "choices": [],
+          "answer": "possess"
+        },
+        {
+          "id": "c15-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "full of excitement or danger",
+          "underlined": null,
+          "choices": [],
+          "answer": "adventurous"
+        },
+        {
+          "id": "c15-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "a painful or uncomfortable feeling of tightness",
+          "underlined": null,
+          "choices": [],
+          "answer": "knot"
+        },
+        {
+          "id": "c15-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "showing beauty, high quality, or good taste",
+          "underlined": null,
+          "choices": [],
+          "answer": "elegant"
+        },
+        {
+          "id": "c15-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "the air that is taken into or pushed out of the lungs",
+          "underlined": null,
+          "choices": [],
+          "answer": "breath"
+        }
+      ]
+    },
+    {
+      "chapter": 16,
+      "wordBank": [
+        "tomb",
+        "trim",
+        "imperial",
+        "chariot",
+        "throne",
+        "emperor"
+      ],
+      "problems": [
+        {
+          "id": "c16-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "The computer repairman was able to ____ my deleted files.",
+          "underlined": null,
+          "choices": [
+            "carve",
+            "restore",
+            "soar",
+            "recite"
+          ],
+          "answer": "restore"
+        },
+        {
+          "id": "c16-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "Kurt didn't know how to ____ the ball well, so he passed it to another player.",
+          "underlined": null,
+          "choices": [
+            "recite",
+            "carve",
+            "dribble",
+            "soar"
+          ],
+          "answer": "dribble"
+        },
+        {
+          "id": "c16-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "The ____ of Central America have steps, so they look quite different from the ones in Egypt.",
+          "underlined": null,
+          "choices": [
+            "pyramids",
+            "knots",
+            "awe",
+            "cues"
+          ],
+          "answer": "pyramids"
+        },
+        {
+          "id": "c16-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "My grandparents told me that they were married in a small ____ in the countryside.",
+          "underlined": null,
+          "choices": [
+            "squeak",
+            "chapel",
+            "trim",
+            "treasure"
+          ],
+          "answer": "chapel"
+        },
+        {
+          "id": "c16-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "All guests must bow before the ____ family.",
+          "underlined": null,
+          "choices": [
+            "royal",
+            "forbidden",
+            "steep",
+            "hidden"
+          ],
+          "answer": "royal"
+        },
+        {
+          "id": "c16-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "The pirates buried their ____ of gold and diamonds somewhere on the island.",
+          "underlined": null,
+          "choices": [
+            "treasure",
+            "mummy",
+            "palace",
+            "squeak"
+          ],
+          "answer": "treasure"
+        },
+        {
+          "id": "c16-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "Quincy went to the nurse's office because he felt like his stomach was in ____.",
+          "underlined": null,
+          "choices": [
+            "pharaohs",
+            "knots",
+            "chariots",
+            "cues"
+          ],
+          "answer": "knots"
+        },
+        {
+          "id": "c16-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "I don't usually go outside when it's sunny, so my skin is very ____.",
+          "underlined": null,
+          "choices": [
+            "royal",
+            "steep",
+            "pale",
+            "courageous"
+          ],
+          "answer": "pale"
+        },
+        {
+          "id": "c16-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "____ have been found all over the world, but the most famous ones are from Egypt.",
+          "underlined": null,
+          "choices": [
+            "Cues",
+            "Trims",
+            "Mummies",
+            "Knots"
+          ],
+          "answer": "Mummies"
+        },
+        {
+          "id": "c16-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "Cleopatra and Tutankhamen are two well-known ____ who ruled ancient Egypt.",
+          "underlined": null,
+          "choices": [
+            "pharaohs",
+            "cues",
+            "tombs",
+            "palaces"
+          ],
+          "answer": "pharaohs"
+        },
+        {
+          "id": "c16-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "We watched the eagle fly high in the sky.",
+          "underlined": "fly",
+          "choices": [
+            "soar",
+            "dribble",
+            "recite",
+            "restore"
+          ],
+          "answer": "soar"
+        },
+        {
+          "id": "c16-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "The tourists from the countryside looked up at the massive skyscraper with wonder.",
+          "underlined": "wonder",
+          "choices": [
+            "trim",
+            "awe",
+            "tomb",
+            "artifact"
+          ],
+          "answer": "awe"
+        },
+        {
+          "id": "c16-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "The brave woman dove into the ocean to save the drowning child.",
+          "underlined": "brave",
+          "choices": [
+            "fascinating",
+            "imperial",
+            "hidden",
+            "courageous"
+          ],
+          "answer": "courageous"
+        },
+        {
+          "id": "c16-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "It was very odd to see a monkey riding a bicycle down the street.",
+          "underlined": "odd",
+          "choices": [
+            "forbidden",
+            "royal",
+            "weird",
+            "pale"
+          ],
+          "answer": "weird"
+        },
+        {
+          "id": "c16-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "a building or underground room in which a dead body is buried",
+          "underlined": null,
+          "choices": [],
+          "answer": "tomb"
+        },
+        {
+          "id": "c16-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "relating to an empire or its ruler",
+          "underlined": null,
+          "choices": [],
+          "answer": "imperial"
+        },
+        {
+          "id": "c16-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "added decoration along the edges of something, such as a building, room, or opening",
+          "underlined": null,
+          "choices": [],
+          "answer": "trim"
+        },
+        {
+          "id": "c16-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "the male ruler of a large group of territories under one authority",
+          "underlined": null,
+          "choices": [],
+          "answer": "emperor"
+        },
+        {
+          "id": "c16-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "a special chair for a ruler",
+          "underlined": null,
+          "choices": [],
+          "answer": "throne"
+        },
+        {
+          "id": "c16-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "a two-wheeled cart that is pulled by horses",
+          "underlined": null,
+          "choices": [],
+          "answer": "chariot"
+        }
+      ]
+    },
+    {
+      "chapter": 17,
+      "wordBank": [
+        "flustered",
+        "exclaim",
+        "reluctantly",
+        "royal",
+        "admit",
+        "inspire"
+      ],
+      "problems": [
+        {
+          "id": "c17-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "Rachel ____ which ice cream she wanted before she picked one.",
+          "underlined": null,
+          "choices": [
+            "dribbled",
+            "considered",
+            "messed up",
+            "bartered"
+          ],
+          "answer": "considered"
+        },
+        {
+          "id": "c17-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "The brave warrior rode his ____ toward the enemy.",
+          "underlined": null,
+          "choices": [
+            "chariot",
+            "breath",
+            "payment",
+            "throne"
+          ],
+          "answer": "chariot"
+        },
+        {
+          "id": "c17-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "My uncle's shiny, new sports car looks ____ in the driveway.",
+          "underlined": null,
+          "choices": [
+            "calm",
+            "flustered",
+            "forbidden",
+            "magnificent"
+          ],
+          "answer": "magnificent"
+        },
+        {
+          "id": "c17-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "A huge curtain made of ____ came down at the end of the play.",
+          "underlined": null,
+          "choices": [
+            "breath",
+            "satin",
+            "creation",
+            "gale"
+          ],
+          "answer": "satin"
+        },
+        {
+          "id": "c17-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "I ____ around the corner to see who was coming down the hall.",
+          "underlined": null,
+          "choices": [
+            "peeked",
+            "disobeyed",
+            "dribbled",
+            "inspired"
+          ],
+          "answer": "peeked"
+        },
+        {
+          "id": "c17-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "My parents wanted to ____ some old things, so we sold them.",
+          "underlined": null,
+          "choices": [
+            "reluctantly",
+            "mess up",
+            "get rid of",
+            "exclaim"
+          ],
+          "answer": "get rid of"
+        },
+        {
+          "id": "c17-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "I want to be a scientist because I am ____ about biology.",
+          "underlined": null,
+          "choices": [
+            "curious",
+            "considerate",
+            "flustered",
+            "royal"
+          ],
+          "answer": "curious"
+        },
+        {
+          "id": "c17-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "The actress went onstage to ____ the award she had won.",
+          "underlined": null,
+          "choices": [
+            "barter",
+            "dribble",
+            "admit",
+            "accept"
+          ],
+          "answer": "accept"
+        },
+        {
+          "id": "c17-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "The sign says that swimming is ____ at this beach when there is no lifeguard on duty.",
+          "underlined": null,
+          "choices": [
+            "royal",
+            "flustered",
+            "forbidden",
+            "humble"
+          ],
+          "answer": "forbidden"
+        },
+        {
+          "id": "c17-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "The ____ announced plans to expand his empire.",
+          "underlined": null,
+          "choices": [
+            "palace",
+            "emperor",
+            "gale",
+            "creation"
+          ],
+          "answer": "emperor"
+        },
+        {
+          "id": "c17-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "I swapped two pencils for one eraser.",
+          "underlined": "swapped",
+          "choices": [
+            "messed up",
+            "exclaimed",
+            "bartered",
+            "inspired"
+          ],
+          "answer": "bartered"
+        },
+        {
+          "id": "c17-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "My aunt is very thoughtful and always sends me a card on my birthday.",
+          "underlined": "thoughtful",
+          "choices": [
+            "royal",
+            "considerate",
+            "magnificent",
+            "curious"
+          ],
+          "answer": "considerate"
+        },
+        {
+          "id": "c17-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "I felt relaxed after I took a shower and drank some tea.",
+          "underlined": "relaxed",
+          "choices": [
+            "calm",
+            "flustered",
+            "humble",
+            "forbidden"
+          ],
+          "answer": "calm"
+        },
+        {
+          "id": "c17-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "The king's soldiers defended the castle from the invading army.",
+          "underlined": "castle",
+          "choices": [
+            "payment",
+            "satin",
+            "creation",
+            "palace"
+          ],
+          "answer": "palace"
+        },
+        {
+          "id": "c17-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "to cry out or speak suddenly and with strong feeling",
+          "underlined": null,
+          "choices": [],
+          "answer": "exclaim"
+        },
+        {
+          "id": "c17-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "to make someone want to do something",
+          "underlined": null,
+          "choices": [],
+          "answer": "inspire"
+        },
+        {
+          "id": "c17-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "to agree that something is true or that someone else is right, especially unwillingly",
+          "underlined": null,
+          "choices": [],
+          "answer": "admit"
+        },
+        {
+          "id": "c17-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "of or having to do with a king, a queen, or a member of their family",
+          "underlined": null,
+          "choices": [],
+          "answer": "royal"
+        },
+        {
+          "id": "c17-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "feeling confused, nervous, and anxious",
+          "underlined": null,
+          "choices": [],
+          "answer": "flustered"
+        },
+        {
+          "id": "c17-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "in a way that shows you do not want to do something",
+          "underlined": null,
+          "choices": [],
+          "answer": "reluctantly"
+        }
+      ]
+    },
+    {
+      "chapter": 18,
+      "wordBank": [
+        "tropical",
+        "payment",
+        "considerate",
+        "aware",
+        "algae",
+        "trade"
+      ],
+      "problems": [
+        {
+          "id": "c18-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "It hurt me when a thorn on the rose ____ my skin.",
+          "underlined": null,
+          "choices": [
+            "traded",
+            "exclaimed",
+            "pierced",
+            "disobeyed"
+          ],
+          "answer": "pierced"
+        },
+        {
+          "id": "c18-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "The farmer doesn't have money, so he will ____ three of his pigs for one cow.",
+          "underlined": null,
+          "choices": [
+            "barter",
+            "peek",
+            "admit",
+            "plunge"
+          ],
+          "answer": "barter"
+        },
+        {
+          "id": "c18-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "The world is full of tiny living ____ that we cannot see without a microscope.",
+          "underlined": null,
+          "choices": [
+            "quests",
+            "organisms",
+            "payments",
+            "arrays"
+          ],
+          "answer": "organisms"
+        },
+        {
+          "id": "c18-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "The villagers lived in small, ____ houses made of straw.",
+          "underlined": null,
+          "choices": [
+            "considerate",
+            "aware",
+            "brilliant",
+            "humble"
+          ],
+          "answer": "humble"
+        },
+        {
+          "id": "c18-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "Tina ____ when the ghost popped out and scared her.",
+          "underlined": null,
+          "choices": [
+            "considered",
+            "exclaimed",
+            "plunged",
+            "disobeyed"
+          ],
+          "answer": "exclaimed"
+        },
+        {
+          "id": "c18-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "Many amazing ____ live in the rainforests of Brazil.",
+          "underlined": null,
+          "choices": [
+            "creatures",
+            "quests",
+            "arrays",
+            "payments"
+          ],
+          "answer": "creatures"
+        },
+        {
+          "id": "c18-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "The submarine ____ deep into the water to explore the ocean floor.",
+          "underlined": null,
+          "choices": [
+            "accepted",
+            "plunged",
+            "considered",
+            "traded"
+          ],
+          "answer": "plunged"
+        },
+        {
+          "id": "c18-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "The painter was proud of her new ____, so she hung it on the wall.",
+          "underlined": null,
+          "choices": [
+            "organism",
+            "creation",
+            "payment",
+            "algae"
+          ],
+          "answer": "creation"
+        },
+        {
+          "id": "c18-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "Mr. Norton didn't ____ my homework because it was late.",
+          "underlined": null,
+          "choices": [
+            "disobey",
+            "accept",
+            "absorb",
+            "peek"
+          ],
+          "answer": "accept"
+        },
+        {
+          "id": "c18-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "There was a wide ____ of snacks for sale at the street market.",
+          "underlined": null,
+          "choices": [
+            "quest",
+            "payment",
+            "array",
+            "algae"
+          ],
+          "answer": "array"
+        },
+        {
+          "id": "c18-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "Joseph is interested in what scientists do, so he reads lots of books about them.",
+          "underlined": "interested",
+          "choices": [
+            "curious",
+            "considerate",
+            "tropical",
+            "aware"
+          ],
+          "answer": "curious"
+        },
+        {
+          "id": "c18-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "Donnie confessed that he had made a mistake and apologized to me.",
+          "underlined": "confessed",
+          "choices": [
+            "exclaimed",
+            "admitted",
+            "plunged",
+            "absorbed"
+          ],
+          "answer": "admitted"
+        },
+        {
+          "id": "c18-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "The full moon looked bright in the clear night sky.",
+          "underlined": "bright",
+          "choices": [
+            "humble",
+            "considerate",
+            "marine",
+            "brilliant"
+          ],
+          "answer": "brilliant"
+        },
+        {
+          "id": "c18-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "The brave hero volunteered to go on the long search for the missing ring.",
+          "underlined": "search",
+          "choices": [
+            "quest",
+            "payment",
+            "organism",
+            "creation"
+          ],
+          "answer": "quest"
+        },
+        {
+          "id": "c18-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "knowing that a thing, condition, or problem exists",
+          "underlined": null,
+          "choices": [],
+          "answer": "aware"
+        },
+        {
+          "id": "c18-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "to give something in exchange for something else",
+          "underlined": null,
+          "choices": [],
+          "answer": "trade"
+        },
+        {
+          "id": "c18-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "having to do with the areas of the world near the equator or the hot, wet climate there",
+          "underlined": null,
+          "choices": [],
+          "answer": "tropical"
+        },
+        {
+          "id": "c18-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "small, simple plants with no leaves that live in or near the water",
+          "underlined": null,
+          "choices": [],
+          "answer": "algae"
+        },
+        {
+          "id": "c18-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "showing kindness by thinking about the feelings of others",
+          "underlined": null,
+          "choices": [],
+          "answer": "considerate"
+        },
+        {
+          "id": "c18-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "an amount of money that is given for something",
+          "underlined": null,
+          "choices": [],
+          "answer": "payment"
+        }
+      ]
+    },
+    {
+      "chapter": 19,
+      "wordBank": [
+        "humble",
+        "court",
+        "swallow",
+        "brilliant",
+        "absorb",
+        "loan"
+      ],
+      "problems": [
+        {
+          "id": "c19-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "My little brother accidentally ____ the birds from the cage.",
+          "underlined": null,
+          "choices": [
+            "thrived",
+            "admitted",
+            "released",
+            "snoozed"
+          ],
+          "answer": "released"
+        },
+        {
+          "id": "c19-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "Many animals live in the rainforest because food is ____ there.",
+          "underlined": null,
+          "choices": [
+            "marine",
+            "humble",
+            "sound",
+            "abundant"
+          ],
+          "answer": "abundant"
+        },
+        {
+          "id": "c19-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "The fish we had caught ____ back and forth as we tried to hold it.",
+          "underlined": null,
+          "choices": [
+            "admitted",
+            "accepted",
+            "thrashed",
+            "thrived"
+          ],
+          "answer": "thrashed"
+        },
+        {
+          "id": "c19-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "Bart had to ____ which game to buy with his allowance.",
+          "underlined": null,
+          "choices": [
+            "consider",
+            "absorb",
+            "peck",
+            "stoop"
+          ],
+          "answer": "consider"
+        },
+        {
+          "id": "c19-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "This store does not take credit, and only cash can be used as ____.",
+          "underlined": null,
+          "choices": [
+            "servant",
+            "payment",
+            "court",
+            "advisor"
+          ],
+          "answer": "payment"
+        },
+        {
+          "id": "c19-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "I had to ____ down to see what was in the mailbox.",
+          "underlined": null,
+          "choices": [
+            "loan",
+            "pierce",
+            "thrive",
+            "stoop"
+          ],
+          "answer": "stoop"
+        },
+        {
+          "id": "c19-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "The prince had to repay the ____ of the gold he had borrowed from the king.",
+          "underlined": null,
+          "choices": [
+            "servant",
+            "debt",
+            "court",
+            "advisor"
+          ],
+          "answer": "debt"
+        },
+        {
+          "id": "c19-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "Ming prefers ____ weather to cold weather because he likes to wear shorts.",
+          "underlined": null,
+          "choices": [
+            "humble",
+            "tropical",
+            "curious",
+            "marine"
+          ],
+          "answer": "tropical"
+        },
+        {
+          "id": "c19-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "The cat always ____ at birds through the kitchen window.",
+          "underlined": null,
+          "choices": [
+            "loans",
+            "absorbs",
+            "accepts",
+            "stares"
+          ],
+          "answer": "stares"
+        },
+        {
+          "id": "c19-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "Scooter ____ that he didn't know how to swim.",
+          "underlined": null,
+          "choices": [
+            "pecked",
+            "snoozed",
+            "admitted",
+            "peeked"
+          ],
+          "answer": "admitted"
+        },
+        {
+          "id": "c19-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "My dad is a career counselor who helps people figure out what job they want to do.",
+          "underlined": "counselor",
+          "choices": [
+            "payment",
+            "court",
+            "debt",
+            "advisor"
+          ],
+          "answer": "advisor"
+        },
+        {
+          "id": "c19-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "Seals are aquatic mammals that live in the ocean but breathe air.",
+          "underlined": "aquatic",
+          "choices": [
+            "sound",
+            "humble",
+            "marine",
+            "vibrant"
+          ],
+          "answer": "marine"
+        },
+        {
+          "id": "c19-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "My brother is very interested in cars, so he has many books about them.",
+          "underlined": "interested",
+          "choices": [
+            "curious",
+            "tropical",
+            "sound",
+            "vibrant"
+          ],
+          "answer": "curious"
+        },
+        {
+          "id": "c19-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "Evelyn's fish began to flourish when she gave them more food.",
+          "underlined": "flourish",
+          "choices": [
+            "absorb",
+            "thrive",
+            "peek",
+            "stare"
+          ],
+          "answer": "thrive"
+        },
+        {
+          "id": "c19-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "to take something into the stomach through the mouth and throat",
+          "underlined": null,
+          "choices": [],
+          "answer": "swallow"
+        },
+        {
+          "id": "c19-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "full of light, shiny, or bright in color",
+          "underlined": null,
+          "choices": [],
+          "answer": "brilliant"
+        },
+        {
+          "id": "c19-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "to soak up or take in",
+          "underlined": null,
+          "choices": [],
+          "answer": "absorb"
+        },
+        {
+          "id": "c19-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "not special, fancy, or expensive",
+          "underlined": null,
+          "choices": [],
+          "answer": "humble"
+        },
+        {
+          "id": "c19-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "to give money to someone who agrees to pay it back in the future",
+          "underlined": null,
+          "choices": [],
+          "answer": "loan"
+        },
+        {
+          "id": "c19-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "the place where a king or queen lives and works",
+          "underlined": null,
+          "choices": [],
+          "answer": "court"
+        }
+      ]
+    },
+    {
+      "chapter": 20,
+      "wordBank": [
+        "coast",
+        "urge",
+        "reluctantly",
+        "stoop",
+        "considerate",
+        "resource"
+      ],
+      "problems": [
+        {
+          "id": "c20-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "The police ____ the thief from escaping with the painting.",
+          "underlined": null,
+          "choices": [
+            "plunged",
+            "maintained",
+            "stooped",
+            "prevented"
+          ],
+          "answer": "prevented"
+        },
+        {
+          "id": "c20-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "Fish ____ in warm, tropical waters that have plenty of food.",
+          "underlined": null,
+          "choices": [
+            "urge",
+            "thrive",
+            "stare",
+            "barter"
+          ],
+          "answer": "thrive"
+        },
+        {
+          "id": "c20-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "The rich family has five ____ who cook meals and clean the house.",
+          "underlined": null,
+          "choices": [
+            "servants",
+            "coasts",
+            "creations",
+            "gulfs"
+          ],
+          "answer": "servants"
+        },
+        {
+          "id": "c20-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "The old village looks beautiful and ____.",
+          "underlined": null,
+          "choices": [
+            "considerate",
+            "numerous",
+            "picturesque",
+            "everlasting"
+          ],
+          "answer": "picturesque"
+        },
+        {
+          "id": "c20-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "The ____ of Jupiter is made up of many different gases.",
+          "underlined": null,
+          "choices": [
+            "advisor",
+            "gulf",
+            "atmosphere",
+            "creation"
+          ],
+          "answer": "atmosphere"
+        },
+        {
+          "id": "c20-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "The president has many ____ who tell him their opinions about what to do.",
+          "underlined": null,
+          "choices": [
+            "coasts",
+            "areas",
+            "advisors",
+            "waste"
+          ],
+          "answer": "advisors"
+        },
+        {
+          "id": "c20-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "The ____ located between Mexico and the United States is a good place for fishing.",
+          "underlined": null,
+          "choices": [
+            "waste",
+            "advisor",
+            "creation",
+            "gulf"
+          ],
+          "answer": "gulf"
+        },
+        {
+          "id": "c20-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "The two countries signed a paper that declared their ____ friendship.",
+          "underlined": null,
+          "choices": [
+            "harsh",
+            "reluctantly",
+            "everlasting",
+            "numerous"
+          ],
+          "answer": "everlasting"
+        },
+        {
+          "id": "c20-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "The crowd ____ at the TV as the reporter announced the shocking news.",
+          "underlined": null,
+          "choices": [
+            "urged",
+            "stared",
+            "bartered",
+            "maintained"
+          ],
+          "answer": "stared"
+        },
+        {
+          "id": "c20-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "The amusement park ride ____ riders from side to side and made them scream.",
+          "underlined": null,
+          "choices": [
+            "consumed",
+            "thrashed",
+            "released",
+            "stooped"
+          ],
+          "answer": "thrashed"
+        },
+        {
+          "id": "c20-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "Because of the heavy rain, few people were walking outside.",
+          "underlined": "few",
+          "choices": [
+            "numerous",
+            "precious",
+            "picturesque",
+            "magnificent"
+          ],
+          "answer": "numerous"
+        },
+        {
+          "id": "c20-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "The show was boring, so I didn't have fun watching it.",
+          "underlined": "boring",
+          "choices": [
+            "everlasting",
+            "considerate",
+            "harsh",
+            "spectacular"
+          ],
+          "answer": "spectacular"
+        },
+        {
+          "id": "c20-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "Douglas borrowed my book because he left his at home.",
+          "underlined": "borrowed",
+          "choices": [
+            "prevented",
+            "stared",
+            "loaned",
+            "maintained"
+          ],
+          "answer": "loaned"
+        },
+        {
+          "id": "c20-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "The mild weather is great for having a picnic or taking a walk.",
+          "underlined": "mild",
+          "choices": [
+            "considerate",
+            "harsh",
+            "spectacular",
+            "everlasting"
+          ],
+          "answer": "harsh"
+        },
+        {
+          "id": "c20-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "showing kindness by thinking about the feelings of others",
+          "underlined": null,
+          "choices": [],
+          "answer": "considerate"
+        },
+        {
+          "id": "c20-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "to bend down or over",
+          "underlined": null,
+          "choices": [],
+          "answer": "stoop"
+        },
+        {
+          "id": "c20-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "in a way that shows you do not want to do something",
+          "underlined": null,
+          "choices": [],
+          "answer": "reluctantly"
+        },
+        {
+          "id": "c20-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "the land next to a sea or ocean",
+          "underlined": null,
+          "choices": [],
+          "answer": "coast"
+        },
+        {
+          "id": "c20-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "a source of useful supplies, materials, or information",
+          "underlined": null,
+          "choices": [],
+          "answer": "resource"
+        },
+        {
+          "id": "c20-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "to strongly advise or try to persuade someone to do something",
+          "underlined": null,
+          "choices": [],
+          "answer": "urge"
+        }
+      ]
+    },
+    {
+      "chapter": 21,
+      "wordBank": [
+        "tinker",
+        "discouraged",
+        "numerous",
+        "area",
+        "frustration",
+        "picturesque"
+      ],
+      "problems": [
+        {
+          "id": "c21-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "The ____ crowd cheered excitedly for the queen on her 90th birthday.",
+          "underlined": null,
+          "choices": [
+            "discouraged",
+            "jubilant",
+            "picturesque",
+            "sound"
+          ],
+          "answer": "jubilant"
+        },
+        {
+          "id": "c21-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "The hungry dog ____ the snack in one bite.",
+          "underlined": null,
+          "choices": [
+            "urged",
+            "swallowed",
+            "recycled",
+            "gazed"
+          ],
+          "answer": "swallowed"
+        },
+        {
+          "id": "c21-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "At the factory where he works, my dad is the ____ of a team of 20 workers.",
+          "underlined": null,
+          "choices": [
+            "court",
+            "container",
+            "area",
+            "manager"
+          ],
+          "answer": "manager"
+        },
+        {
+          "id": "c21-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "The school nurse recommends that we ____ eight glasses of water a day.",
+          "underlined": null,
+          "choices": [
+            "gaze",
+            "snooze",
+            "consume",
+            "tinker"
+          ],
+          "answer": "consume"
+        },
+        {
+          "id": "c21-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "In gym class, Mr. Wallace ____ the class into two teams.",
+          "underlined": null,
+          "choices": [
+            "separated",
+            "snoozed",
+            "recycled",
+            "disobeyed"
+          ],
+          "answer": "separated"
+        },
+        {
+          "id": "c21-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "Water ____ is important, so remember to turn off the tap.",
+          "underlined": null,
+          "choices": [
+            "area",
+            "frustration",
+            "court",
+            "conservation"
+          ],
+          "answer": "conservation"
+        },
+        {
+          "id": "c21-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "Maria can sing well, so her sister ____ her to try out for the singing contest.",
+          "underlined": null,
+          "choices": [
+            "transferred",
+            "urged",
+            "maintained",
+            "traded"
+          ],
+          "answer": "urged"
+        },
+        {
+          "id": "c21-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "The businessman borrowed money from the bank, so now he has ____.",
+          "underlined": null,
+          "choices": [
+            "debt",
+            "area",
+            "court",
+            "container"
+          ],
+          "answer": "debt"
+        },
+        {
+          "id": "c21-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "The skyscraper is made of metal and other strong ____.",
+          "underlined": null,
+          "choices": [
+            "materials",
+            "managers",
+            "courts",
+            "frustrations"
+          ],
+          "answer": "materials"
+        },
+        {
+          "id": "c21-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "The lifeguard ____ everyone to get out of the pool at closing time.",
+          "underlined": null,
+          "choices": [
+            "tinkered",
+            "traded",
+            "maintained",
+            "ordered"
+          ],
+          "answer": "ordered"
+        },
+        {
+          "id": "c21-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "The plastic from an empty bottle can be reused and made into a new one.",
+          "underlined": "reused",
+          "choices": [
+            "ruined",
+            "urged",
+            "recycled",
+            "disobeyed"
+          ],
+          "answer": "recycled"
+        },
+        {
+          "id": "c21-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "I keep my body healthy by eating a lot of fruits and vegetables.",
+          "underlined": "healthy",
+          "choices": [
+            "discouraged",
+            "sound",
+            "remaining",
+            "numerous"
+          ],
+          "answer": "sound"
+        },
+        {
+          "id": "c21-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "There was only one leftover piece of cake, so I offered it to Grandpa.",
+          "underlined": "leftover",
+          "choices": [
+            "picturesque",
+            "remaining",
+            "numerous",
+            "jubilant"
+          ],
+          "answer": "remaining"
+        },
+        {
+          "id": "c21-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "Jasmine and Amy exchanged phone numbers so that they could talk about the project.",
+          "underlined": "exchanged",
+          "choices": [
+            "traded",
+            "urged",
+            "gazed",
+            "tinkered"
+          ],
+          "answer": "traded"
+        },
+        {
+          "id": "c21-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "the feeling of being upset because you are unable to do something",
+          "underlined": null,
+          "choices": [],
+          "answer": "frustration"
+        },
+        {
+          "id": "c21-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "being many or great in number",
+          "underlined": null,
+          "choices": [],
+          "answer": "numerous"
+        },
+        {
+          "id": "c21-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "to try to improve or repair something by making small changes",
+          "underlined": null,
+          "choices": [],
+          "answer": "tinker"
+        },
+        {
+          "id": "c21-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "very beautiful or charming, like a painted picture",
+          "underlined": null,
+          "choices": [],
+          "answer": "picturesque"
+        },
+        {
+          "id": "c21-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "a place or region",
+          "underlined": null,
+          "choices": [],
+          "answer": "area"
+        },
+        {
+          "id": "c21-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "feeling hopeless and that you want to give up",
+          "underlined": null,
+          "choices": [],
+          "answer": "discouraged"
+        }
+      ]
+    },
+    {
+      "chapter": 22,
+      "wordBank": [
+        "transfer",
+        "system",
+        "antenna",
+        "conservation",
+        "electronic",
+        "tinker"
+      ],
+      "problems": [
+        {
+          "id": "c22-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "Mr. Jackson uses a ____ mouse because he doesn't like cords or cables.",
+          "underlined": null,
+          "choices": [
+            "remaining",
+            "wireless",
+            "discouraged",
+            "jubilant"
+          ],
+          "answer": "wireless"
+        },
+        {
+          "id": "c22-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "Dad ____ a tag to my bag so that I could find it at the airport.",
+          "underlined": null,
+          "choices": [
+            "discussed",
+            "attached",
+            "complained",
+            "gazed"
+          ],
+          "answer": "attached"
+        },
+        {
+          "id": "c22-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "Cell phones and computers are ____ that many people use every day.",
+          "underlined": null,
+          "choices": [
+            "dialogues",
+            "conservation",
+            "devices",
+            "containers"
+          ],
+          "answer": "devices"
+        },
+        {
+          "id": "c22-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "The two ____ soccer teams will play each other in the championship game.",
+          "underlined": null,
+          "choices": [
+            "discouraged",
+            "remaining",
+            "wireless",
+            "electronic"
+          ],
+          "answer": "remaining"
+        },
+        {
+          "id": "c22-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "We enjoyed watching the funny ____ between the clowns on stage.",
+          "underlined": null,
+          "choices": [
+            "interaction",
+            "network",
+            "conservation",
+            "antenna"
+          ],
+          "answer": "interaction"
+        },
+        {
+          "id": "c22-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "We ____ the apples and oranges into two baskets.",
+          "underlined": null,
+          "choices": [
+            "complained",
+            "separated",
+            "repaired",
+            "tinkered"
+          ],
+          "answer": "separated"
+        },
+        {
+          "id": "c22-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "The ____ talked to her team about her amazing new business idea.",
+          "underlined": null,
+          "choices": [
+            "monitor",
+            "container",
+            "antenna",
+            "manager"
+          ],
+          "answer": "manager"
+        },
+        {
+          "id": "c22-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "The house fell down during the storm because the ____ used to build it were not strong.",
+          "underlined": null,
+          "choices": [
+            "materials",
+            "dialogues",
+            "voicemails",
+            "conversations"
+          ],
+          "answer": "materials"
+        },
+        {
+          "id": "c22-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "Maxine ____ that her stomach hurt, so her mother took her to the hospital.",
+          "underlined": null,
+          "choices": [
+            "repaired",
+            "complained",
+            "tinkered",
+            "recycled"
+          ],
+          "answer": "complained"
+        },
+        {
+          "id": "c22-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "The actor memorized his lines of ____ before he filmed the new movie.",
+          "underlined": null,
+          "choices": [
+            "frustration",
+            "dialogue",
+            "system",
+            "conservation"
+          ],
+          "answer": "dialogue"
+        },
+        {
+          "id": "c22-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "We checked the display at the airport to see if our flight was on time.",
+          "underlined": "display",
+          "choices": [
+            "dialogue",
+            "monitor",
+            "manager",
+            "frustration"
+          ],
+          "answer": "monitor"
+        },
+        {
+          "id": "c22-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "We all felt overjoyed when we heard that our team had won first place.",
+          "underlined": "overjoyed",
+          "choices": [
+            "jubilant",
+            "remaining",
+            "electronic",
+            "wireless"
+          ],
+          "answer": "jubilant"
+        },
+        {
+          "id": "c22-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "The king had a discussion with his advisors about building a new castle.",
+          "underlined": "discussion",
+          "choices": [
+            "material",
+            "antenna",
+            "system",
+            "conversation"
+          ],
+          "answer": "conversation"
+        },
+        {
+          "id": "c22-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "Nancy destroyed her computer when she spilled milk all over it.",
+          "underlined": "destroyed",
+          "choices": [
+            "ruined",
+            "complained",
+            "attached",
+            "discussed"
+          ],
+          "answer": "ruined"
+        },
+        {
+          "id": "c22-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "the careful use of resources, such as water or oil, so that they are not wasted",
+          "underlined": null,
+          "choices": [],
+          "answer": "conservation"
+        },
+        {
+          "id": "c22-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "a group of related parts that work together as a whole",
+          "underlined": null,
+          "choices": [],
+          "answer": "system"
+        },
+        {
+          "id": "c22-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "using electricity or a computer",
+          "underlined": null,
+          "choices": [],
+          "answer": "electronic"
+        },
+        {
+          "id": "c22-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "a metal device that sends or receives radio or television signals",
+          "underlined": null,
+          "choices": [],
+          "answer": "antenna"
+        },
+        {
+          "id": "c22-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "to try to improve or repair something by making small changes",
+          "underlined": null,
+          "choices": [],
+          "answer": "tinker"
+        },
+        {
+          "id": "c22-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "to move someone or something from one place to another",
+          "underlined": null,
+          "choices": [],
+          "answer": "transfer"
+        }
+      ]
+    },
+    {
+      "chapter": 23,
+      "wordBank": [
+        "globe",
+        "complain",
+        "flyer",
+        "sort",
+        "frustration",
+        "lend"
+      ],
+      "problems": [
+        {
+          "id": "c23-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "Let's ____ tickets for the play now.",
+          "underlined": null,
+          "choices": [
+            "repair",
+            "overflow",
+            "attach",
+            "book"
+          ],
+          "answer": "book"
+        },
+        {
+          "id": "c23-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "Ronaldo ____ loudly when he saw the long line at the airport.",
+          "underlined": null,
+          "choices": [
+            "ruined",
+            "transferred",
+            "sighed",
+            "sorted"
+          ],
+          "answer": "sighed"
+        },
+        {
+          "id": "c23-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "Dad's car is broken, so he will ____ it with his tools.",
+          "underlined": null,
+          "choices": [
+            "complain",
+            "repair",
+            "overflow",
+            "book"
+          ],
+          "answer": "repair"
+        },
+        {
+          "id": "c23-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "My friends and I ____ what we plan to do on our summer vacation.",
+          "underlined": null,
+          "choices": [
+            "discussed",
+            "transferred",
+            "attached",
+            "lent"
+          ],
+          "answer": "discussed"
+        },
+        {
+          "id": "c23-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "The baby hippo let out a happy ____ when it saw its mother.",
+          "underlined": null,
+          "choices": [
+            "system",
+            "snort",
+            "flyer",
+            "manager"
+          ],
+          "answer": "snort"
+        },
+        {
+          "id": "c23-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "Be careful not to drop your smartphone or you might ____ it.",
+          "underlined": null,
+          "choices": [
+            "ruin",
+            "swap",
+            "complain",
+            "book"
+          ],
+          "answer": "ruin"
+        },
+        {
+          "id": "c23-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "My grandfather uses a ____ that counts his steps.",
+          "underlined": null,
+          "choices": [
+            "globe",
+            "device",
+            "volunteer",
+            "flyer"
+          ],
+          "answer": "device"
+        },
+        {
+          "id": "c23-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "I forgot to turn off the sink, so the water began to ____.",
+          "underlined": null,
+          "choices": [
+            "attach",
+            "overflow",
+            "discuss",
+            "book"
+          ],
+          "answer": "overflow"
+        },
+        {
+          "id": "c23-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "The computer, keyboard, mouse, and monitor all work together as one ____.",
+          "underlined": null,
+          "choices": [
+            "flyer",
+            "frustration",
+            "system",
+            "conservation"
+          ],
+          "answer": "system"
+        },
+        {
+          "id": "c23-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "Kayla is a(n) ____ who helps people in need at the homeless shelter.",
+          "underlined": null,
+          "choices": [
+            "interaction",
+            "volunteer",
+            "conservation",
+            "technology"
+          ],
+          "answer": "volunteer"
+        },
+        {
+          "id": "c23-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "The truck driver connected the trailer to his truck and drove away.",
+          "underlined": "connected",
+          "choices": [
+            "attached",
+            "overflowed",
+            "discussed",
+            "booked"
+          ],
+          "answer": "attached"
+        },
+        {
+          "id": "c23-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "My grandparents are always glad to see me when I visit.",
+          "underlined": "glad",
+          "choices": [
+            "fair",
+            "old-fashioned",
+            "reliable",
+            "pleased"
+          ],
+          "answer": "pleased"
+        },
+        {
+          "id": "c23-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "Mom is a supervisor who is in charge of hiring new workers at her company.",
+          "underlined": "supervisor",
+          "choices": [
+            "manager",
+            "globe",
+            "snort",
+            "flyer"
+          ],
+          "answer": "manager"
+        },
+        {
+          "id": "c23-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "We can exchange this shirt for a bigger size at the store.",
+          "underlined": "exchange",
+          "choices": [
+            "swap",
+            "ruin",
+            "sigh",
+            "complain"
+          ],
+          "answer": "swap"
+        },
+        {
+          "id": "c23-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "to give something to someone to be used for a period of time and then returned",
+          "underlined": null,
+          "choices": [],
+          "answer": "lend"
+        },
+        {
+          "id": "c23-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "the planet Earth",
+          "underlined": null,
+          "choices": [],
+          "answer": "globe"
+        },
+        {
+          "id": "c23-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "the feeling of being upset because you are unable to do something",
+          "underlined": null,
+          "choices": [],
+          "answer": "frustration"
+        },
+        {
+          "id": "c23-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "a piece of paper with information on it that is given to many people",
+          "underlined": null,
+          "choices": [],
+          "answer": "flyer"
+        },
+        {
+          "id": "c23-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "to say that something is not good or that you are unhappy about it",
+          "underlined": null,
+          "choices": [],
+          "answer": "complain"
+        },
+        {
+          "id": "c23-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "to arrange or separate things into different types or groups",
+          "underlined": null,
+          "choices": [],
+          "answer": "sort"
+        }
+      ]
+    },
+    {
+      "chapter": 24,
+      "wordBank": [
+        "infinite",
+        "snort",
+        "convenience",
+        "generation",
+        "gaze",
+        "promptly"
+      ],
+      "problems": [
+        {
+          "id": "c24-1",
+          "number": 1,
+          "section": "sentence",
+          "prompt": "This vacuum cleaner has many ____ that help it clean different things.",
+          "underlined": null,
+          "choices": [
+            "dialogues",
+            "stationery",
+            "attachments",
+            "snorts"
+          ],
+          "answer": "attachments"
+        },
+        {
+          "id": "c24-2",
+          "number": 2,
+          "section": "sentence",
+          "prompt": "The water of the Amazon River ____ into the Atlantic Ocean.",
+          "underlined": null,
+          "choices": [
+            "gazes",
+            "tinkers",
+            "flows",
+            "responds"
+          ],
+          "answer": "flows"
+        },
+        {
+          "id": "c24-3",
+          "number": 3,
+          "section": "sentence",
+          "prompt": "Owen wants to buy a(n) ____ new car because his old car is always breaking.",
+          "underlined": null,
+          "choices": [
+            "discouraged",
+            "infinite",
+            "fair",
+            "reliable"
+          ],
+          "answer": "reliable"
+        },
+        {
+          "id": "c24-4",
+          "number": 4,
+          "section": "sentence",
+          "prompt": "I like my ____ headphones because they don't need a cord.",
+          "underlined": null,
+          "choices": [
+            "fair",
+            "wireless",
+            "infinite",
+            "promptly"
+          ],
+          "answer": "wireless"
+        },
+        {
+          "id": "c24-5",
+          "number": 5,
+          "section": "sentence",
+          "prompt": "Every Wednesday, we ____ our paper, glass, and plastic items.",
+          "underlined": null,
+          "choices": [
+            "respond",
+            "gaze",
+            "recycle",
+            "express"
+          ],
+          "answer": "recycle"
+        },
+        {
+          "id": "c24-6",
+          "number": 6,
+          "section": "sentence",
+          "prompt": "Dad ____ loudly when we accidentally broke the vase.",
+          "underlined": null,
+          "choices": [
+            "gazed",
+            "delivered",
+            "booked",
+            "sighed"
+          ],
+          "answer": "sighed"
+        },
+        {
+          "id": "c24-7",
+          "number": 7,
+          "section": "sentence",
+          "prompt": "I put a ____ on the letter so that I can send it to my pen pal.",
+          "underlined": null,
+          "choices": [
+            "generation",
+            "data",
+            "stamp",
+            "snort"
+          ],
+          "answer": "stamp"
+        },
+        {
+          "id": "c24-8",
+          "number": 8,
+          "section": "sentence",
+          "prompt": "The prince wrote a letter to the princess to ____ his love for her.",
+          "underlined": null,
+          "choices": [
+            "gaze",
+            "express",
+            "book",
+            "tinker"
+          ],
+          "answer": "express"
+        },
+        {
+          "id": "c24-9",
+          "number": 9,
+          "section": "sentence",
+          "prompt": "We went to the post office to drop off our ____.",
+          "underlined": null,
+          "choices": [
+            "dialogue",
+            "package",
+            "snort",
+            "generation"
+          ],
+          "answer": "package"
+        },
+        {
+          "id": "c24-10",
+          "number": 10,
+          "section": "sentence",
+          "prompt": "My parents tell me that I shouldn't feel ____ when I make a mistake.",
+          "underlined": null,
+          "choices": [
+            "discouraged",
+            "electronic",
+            "fair",
+            "infinite"
+          ],
+          "answer": "discouraged"
+        },
+        {
+          "id": "c24-11",
+          "number": 11,
+          "section": "synonym",
+          "prompt": "I keep all of my coins in a small bag so that they don't get lost.",
+          "underlined": "bag",
+          "choices": [
+            "dialogue",
+            "pouch",
+            "data",
+            "signature"
+          ],
+          "answer": "pouch"
+        },
+        {
+          "id": "c24-12",
+          "number": 12,
+          "section": "synonym",
+          "prompt": "My parents will reserve a ballroom for my grandmother's 100th birthday.",
+          "underlined": "reserve",
+          "choices": [
+            "deliver",
+            "gaze",
+            "book",
+            "overflow"
+          ],
+          "answer": "book"
+        },
+        {
+          "id": "c24-13",
+          "number": 13,
+          "section": "synonym",
+          "prompt": "My mom packs my lunch into a box so that I can carry it to school easily.",
+          "underlined": "box",
+          "choices": [
+            "container",
+            "snort",
+            "dialogue",
+            "generation"
+          ],
+          "answer": "container"
+        },
+        {
+          "id": "c24-14",
+          "number": 14,
+          "section": "synonym",
+          "prompt": "Fatima sent a text message to her friend and waited for him to reply.",
+          "underlined": "reply",
+          "choices": [
+            "tinker",
+            "gaze",
+            "respond",
+            "flow"
+          ],
+          "answer": "respond"
+        },
+        {
+          "id": "c24-15",
+          "number": 15,
+          "section": "definition",
+          "prompt": "an entire group of people born around the same time",
+          "underlined": null,
+          "choices": [],
+          "answer": "generation"
+        },
+        {
+          "id": "c24-16",
+          "number": 16,
+          "section": "definition",
+          "prompt": "quickly and without delay",
+          "underlined": null,
+          "choices": [],
+          "answer": "promptly"
+        },
+        {
+          "id": "c24-17",
+          "number": 17,
+          "section": "definition",
+          "prompt": "the sound or act of forcing air through the nose noisily",
+          "underlined": null,
+          "choices": [],
+          "answer": "snort"
+        },
+        {
+          "id": "c24-18",
+          "number": 18,
+          "section": "definition",
+          "prompt": "to look at someone or something in a steady way for a long time",
+          "underlined": null,
+          "choices": [],
+          "answer": "gaze"
+        },
+        {
+          "id": "c24-19",
+          "number": 19,
+          "section": "definition",
+          "prompt": "having no limits or never-ending",
+          "underlined": null,
+          "choices": [],
+          "answer": "infinite"
+        },
+        {
+          "id": "c24-20",
+          "number": 20,
+          "section": "definition",
+          "prompt": "something that makes you more comfortable by letting you do something easily",
+          "underlined": null,
+          "choices": [],
+          "answer": "convenience"
+        }
+      ]
+    }
+  ]
+}

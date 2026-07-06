@@ -21,10 +21,12 @@ TEMPLATE = ROOT / "index.template.html"
 ENGINE = ROOT / "engine.js"
 OUT = ROOT / "index.html"
 ENV = ROOT / ".env"
+POLY = ROOT / "poly_problems.json"
 
 PLACEHOLDER = "__OPENROUTER_API_KEY__"
 SB_URL_PLACEHOLDER = "__SUPABASE_URL__"
 SB_KEY_PLACEHOLDER = "__SUPABASE_ANON_KEY__"
+POLY_PLACEHOLDER = "__POLY_PROBLEMS__"
 SCRIPT_TAG = '<script src="engine.js"></script>'
 
 
@@ -58,12 +60,18 @@ def main() -> None:
     if "</script>" in engine:
         sys.exit("ERROR: engine.js contains a literal </script>; cannot inline safely")
 
+    if POLY_PLACEHOLDER not in html:
+        sys.exit(f"ERROR: expected {POLY_PLACEHOLDER!r} placeholder in template")
+    poly = POLY.read_text(encoding="utf-8").strip() if POLY.exists() else "null"
+
     # Inline the engine in place of the external script tag.
     html = html.replace(SCRIPT_TAG, f"<script>\n{engine}\n</script>")
     # Inject the real key and Supabase config.
     html = html.replace(PLACEHOLDER, key)
     html = html.replace(SB_URL_PLACEHOLDER, sb_url)
     html = html.replace(SB_KEY_PLACEHOLDER, sb_key)
+    # Inject the Poly problem set (valid JSON == valid JS literal).
+    html = html.replace(POLY_PLACEHOLDER, poly)
 
     if PLACEHOLDER in html:
         sys.exit("ERROR: placeholder still present after injection")
