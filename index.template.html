@@ -1062,6 +1062,34 @@
     }
     .count-chip:hover:not(.active) { border-color: var(--purple); }
 
+    /* Poly chapter picker */
+    .poly-chapter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .poly-chapter {
+      min-height: 60px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border);
+      background: var(--surface);
+      color: var(--text-main);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      transition: all .15s;
+      padding: 6px 4px;
+    }
+    .poly-chapter .pc-num  { font-size: var(--fs-md); font-weight: 800; }
+    .poly-chapter .pc-sub  { font-size: 11px; font-weight: 700; color: var(--text-sub); }
+    .poly-chapter.active {
+      border-color: var(--yellow-dark);
+      background: var(--yellow);
+      color: #7a5c00;
+    }
+    .poly-chapter.active .pc-sub { color: #7a5c00; }
+    .poly-chapter:hover:not(.active) { border-color: var(--yellow-dark); }
+
     .type-chips {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1412,6 +1440,9 @@
       <button class="btn-primary teal" id="btn-start-quiz" style="font-size: var(--fs-lg); min-height: 80px;">
         ▶ 퀴즈 시작
       </button>
+      <button class="btn-primary yellow" id="btn-go-poly" style="font-size: var(--fs-lg); min-height: 72px;">
+        📗 폴리 스펠링비
+      </button>
     </div>
 
     <!-- No-words guidance -->
@@ -1692,6 +1723,59 @@
   </section>
 
   <!-- ============================================================
+       SCREEN 5b — POLY SPELLING BEE SETUP
+  ============================================================ -->
+  <section id="screen-poly" class="screen" role="main" aria-label="폴리 스펠링비">
+    <div class="top-bar">
+      <button class="btn-icon" id="btn-poly-back" aria-label="홈으로 돌아가기">←</button>
+      <h1>📗 폴리 스펠링비</h1>
+    </div>
+
+    <div class="setup-section">
+      <p class="section-label">챕터 선택</p>
+      <div class="poly-chapter-grid" id="poly-chapter-grid" role="group" aria-label="챕터 선택"></div>
+    </div>
+
+    <div class="setup-section">
+      <p class="section-label">문제 유형
+        <span style="font-weight:600; color:var(--text-sub); font-size:var(--fs-sm);">(여러 개 선택 가능)</span>
+      </p>
+      <div class="type-chips" role="group" aria-label="문제 유형 선택">
+        <button class="type-chip active" data-poly-type="sentence" aria-pressed="true">
+          <span class="type-key">빈칸 채우기</span>
+          <span class="type-desc">문장 빈칸에 맞는 단어</span>
+        </button>
+        <button class="type-chip active" data-poly-type="synonym" aria-pressed="true">
+          <span class="type-key">유의어</span>
+          <span class="type-desc">밑줄 단어의 유의어</span>
+        </button>
+        <button class="type-chip active" data-poly-type="definition" aria-pressed="true">
+          <span class="type-key">뜻풀이</span>
+          <span class="type-desc">설명에 맞는 단어</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="setup-section">
+      <p class="section-label">문제 수</p>
+      <div class="count-chips" role="group" aria-label="문제 수 선택">
+        <button class="count-chip" data-poly-count="10" aria-pressed="false">10</button>
+        <button class="count-chip active" data-poly-count="0" aria-pressed="true">전체</button>
+      </div>
+    </div>
+
+    <div class="flex-1"></div>
+
+    <div id="poly-error" class="card hidden" role="alert"
+         style="text-align:center; color:var(--red); font-size:var(--fs-sm); font-weight:700; padding:var(--gap);">
+    </div>
+
+    <button class="btn-primary yellow" id="btn-start-poly-go" style="font-size:var(--fs-lg); min-height:72px;" disabled>
+      챕터를 선택하세요
+    </button>
+  </section>
+
+  <!-- ============================================================
        SCREEN 6 — QUIZ PLAY
   ============================================================ -->
   <section id="screen-quiz" class="screen" role="main" aria-label="퀴즈 풀이">
@@ -1776,6 +1860,10 @@ const State = {
   quizGroup: null,
   quizCount: 10,
   quizTypes: ['A','B','C','D'], // selected question types (multi-select)
+  quizMode: 'words',            // 'words' | 'poly'
+  polyChapter: null,            // selected Poly chapter number
+  polySections: ['sentence','synonym','definition'],
+  polyCount: 0,                 // 0 = all filtered problems
   wrongWords: [],               // { word, meaning } for result screen
   correctCount: 0,
   pendingWords: [],             // PartialWord[] waiting to be confirmed
@@ -1788,7 +1876,7 @@ const State = {
 /* =============================================================
    SCREEN NAVIGATION
 ============================================================= */
-const SCREENS = ['home','add','confirm','wordbook','quiz-setup','quiz','result'];
+const SCREENS = ['home','add','confirm','wordbook','quiz-setup','poly','quiz','result'];
 
 function showScreen(id) {
   SCREENS.forEach(s => {
@@ -1850,6 +1938,114 @@ document.getElementById('btn-go-wordbook').addEventListener('click', async () =>
 document.getElementById('btn-start-quiz').addEventListener('click', async () => {
   await refreshQuizSetup();
   showScreen('quiz-setup');
+});
+document.getElementById('btn-go-poly').addEventListener('click', () => {
+  openPolySetup();
+  showScreen('poly');
+});
+
+/* =============================================================
+   POLY SPELLING BEE SETUP
+============================================================= */
+const POLY_SECTION_LABEL = { sentence: '빈칸', synonym: '유의어', definition: '뜻풀이' };
+
+function openPolySetup() {
+  const grid = document.getElementById('poly-chapter-grid');
+  const chapters = (window.SnapEngine && SnapEngine.getPolyChapters) ? SnapEngine.getPolyChapters() : [];
+
+  document.getElementById('poly-error').classList.add('hidden');
+
+  if (!chapters.length) {
+    grid.innerHTML = '<p style="color:var(--text-sub); font-size:var(--fs-sm);">문제 데이터를 불러오지 못했어요.</p>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  chapters.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'poly-chapter';
+    btn.dataset.chapter = c.chapter;
+    btn.innerHTML = `<span class="pc-num">Ch.${c.chapter}</span><span class="pc-sub">${c.count}문제</span>`;
+    btn.addEventListener('click', () => selectPolyChapter(c.chapter, btn));
+    grid.appendChild(btn);
+  });
+
+  // reset selection each time the screen is opened
+  State.polyChapter = null;
+  State.polySections = ['sentence','synonym','definition'];
+  State.polyCount = 0;
+  document.querySelectorAll('[data-poly-type]').forEach(b => { b.classList.add('active'); b.setAttribute('aria-pressed','true'); });
+  document.querySelectorAll('[data-poly-count]').forEach(b => {
+    const on = b.dataset.polyCount === '0';
+    b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on));
+  });
+  updatePolyStartButton();
+}
+
+function selectPolyChapter(chapter, btn) {
+  State.polyChapter = chapter;
+  document.querySelectorAll('.poly-chapter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updatePolyStartButton();
+}
+
+function updatePolyStartButton() {
+  const go = document.getElementById('btn-start-poly-go');
+  const ready = State.polyChapter != null && State.polySections.length > 0;
+  go.disabled = !ready;
+  go.textContent = State.polyChapter == null
+    ? '챕터를 선택하세요'
+    : (State.polySections.length === 0 ? '유형을 선택하세요' : `Ch.${State.polyChapter} 시작! 🚀`);
+}
+
+// Section-type chips (multi-select, at least one)
+document.querySelectorAll('[data-poly-type]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const active = document.querySelectorAll('[data-poly-type].active');
+    const isActive = chip.classList.contains('active');
+    if (isActive && active.length === 1) return; // keep at least one
+    chip.classList.toggle('active');
+    chip.setAttribute('aria-pressed', String(chip.classList.contains('active')));
+    State.polySections = Array.from(document.querySelectorAll('[data-poly-type].active'))
+      .map(c => c.dataset.polyType);
+    updatePolyStartButton();
+  });
+});
+
+// Count chips (single-select)
+document.querySelectorAll('[data-poly-count]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('[data-poly-count]').forEach(c => {
+      c.classList.remove('active'); c.setAttribute('aria-pressed','false');
+    });
+    chip.classList.add('active'); chip.setAttribute('aria-pressed','true');
+    State.polyCount = parseInt(chip.dataset.polyCount, 10);
+  });
+});
+
+document.getElementById('btn-poly-back').addEventListener('click', () => showScreen('home'));
+
+document.getElementById('btn-start-poly-go').addEventListener('click', () => {
+  const errEl = document.getElementById('poly-error');
+  errEl.classList.add('hidden');
+  try {
+    const questions = SnapEngine.buildPolyQuiz({
+      chapter: State.polyChapter,
+      sections: State.polySections,
+      count: State.polyCount,
+    });
+    State.currentQuiz  = questions;
+    State.quizIndex    = 0;
+    State.wrongWords   = [];
+    State.correctCount = 0;
+    State.quizMode     = 'poly';
+    showScreen('quiz');
+    renderQuestion();
+  } catch (e) {
+    errEl.textContent = '⚠️ ' + e.message;
+    errEl.classList.remove('hidden');
+    announce(errEl.textContent);
+  }
 });
 
 /* =============================================================
@@ -2782,6 +2978,7 @@ document.getElementById('btn-start-quiz-go').addEventListener('click', async () 
     State.correctCount = 0;
     State.quizScope    = scope;
     State.quizGroup    = group;
+    State.quizMode     = 'words';
     showScreen('quiz');
     renderQuestion();
   } catch(e) {
@@ -2812,7 +3009,7 @@ function renderQuestion() {
   document.getElementById('progress-fill').style.width  = `${Math.round((idx / total) * 100)}%`;
 
   // Type badge
-  document.getElementById('quiz-type-badge').textContent = `유형 ${q.type} — ${TYPE_LABELS[q.type] || ''}`;
+  document.getElementById('quiz-type-badge').textContent = q.badge || `유형 ${q.type} — ${TYPE_LABELS[q.type] || ''}`;
 
   // Prompt
   document.getElementById('quiz-prompt-label').textContent = q.promptLabel;
@@ -2997,6 +3194,11 @@ function showResult() {
     wrongSection.classList.add('hidden');
   }
 
+  // Poly quizzes aren't tied to the user's words, so hide the word-only
+  // actions (review-only / add-photo). "다시 풀기" rebuilds the Poly quiz.
+  const isPoly = State.quizMode === 'poly';
+  document.querySelector('#screen-result .result-actions-row').style.display = isPoly ? 'none' : '';
+
   showScreen('result');
   announce(`퀴즈 결과: ${total}문제 중 ${correct}개 정답, ${pct}%`);
 }
@@ -3006,12 +3208,18 @@ document.getElementById('btn-retry').addEventListener('click', async () => {
   const btn = document.getElementById('btn-retry');
   btn.disabled = true;
   try {
-    const questions = await SnapEngine.buildQuiz({
-      scope: State.quizScope,
-      group: State.quizGroup,
-      count: State.currentQuiz.length,
-      types: State.quizTypes,
-    });
+    const questions = State.quizMode === 'poly'
+      ? SnapEngine.buildPolyQuiz({
+          chapter: State.polyChapter,
+          sections: State.polySections,
+          count: State.polyCount,
+        })
+      : await SnapEngine.buildQuiz({
+          scope: State.quizScope,
+          group: State.quizGroup,
+          count: State.currentQuiz.length,
+          types: State.quizTypes,
+        });
     State.currentQuiz  = questions;
     State.quizIndex    = 0;
     State.wrongWords   = [];
@@ -3040,6 +3248,7 @@ document.getElementById('btn-retry-review').addEventListener('click', async () =
     State.correctCount = 0;
     State.quizScope    = 'review';
     State.quizGroup    = null;
+    State.quizMode     = 'words';
     showScreen('quiz');
     renderQuestion();
   } catch(e) {

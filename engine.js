@@ -1212,6 +1212,89 @@ Rules:
   }
 
   // ---------------------------------------------------------------------------
+  // Poly Spelling Bee — a fixed problem set (window.POLY_PROBLEMS) turned into
+  // ready-to-play quiz questions, separate from the user's own word list.
+  // ---------------------------------------------------------------------------
+
+  const _POLY = (global.POLY_PROBLEMS && Array.isArray(global.POLY_PROBLEMS.chapters))
+    ? global.POLY_PROBLEMS
+    : null;
+
+  const POLY_LABELS = {
+    sentence:   '빈칸에 알맞은 단어를 고르세요:',
+    synonym:    '밑줄 친 단어의 유의어를 고르세요:',
+    definition: '설명에 맞는 단어를 고르세요:',
+  };
+  const POLY_SECTION_BADGE = { sentence: '빈칸', synonym: '유의어', definition: '뜻풀이' };
+
+  /** List available chapters with per-section counts. */
+  function getPolyChapters() {
+    if (!_POLY) return [];
+    return _POLY.chapters.map(c => {
+      const counts = { sentence: 0, synonym: 0, definition: 0 };
+      for (const p of c.problems) counts[p.section] = (counts[p.section] || 0) + 1;
+      return { chapter: c.chapter, count: c.problems.length, counts };
+    });
+  }
+
+  // Build 4 multiple-choice options for a problem. definition items have no
+  // built-in choices, so draw distractors from the chapter's word bank.
+  function _polyChoices(problem, chapter) {
+    if (problem.section === 'definition') {
+      const bank = (chapter.wordBank || []).filter(w => _norm(w) !== _norm(problem.answer));
+      const distractors = _shuffle(bank.slice()).slice(0, 3);
+      return _shuffle([problem.answer, ...distractors]);
+    }
+    return _shuffle((problem.choices || []).slice());
+  }
+
+  // promptText renders as plain text, so mark the synonym target with 「」.
+  function _polyPromptText(problem) {
+    if (problem.section === 'synonym' && problem.underlined) {
+      const re = new RegExp(`\\b${_escapeRegex(problem.underlined)}\\b`, 'i');
+      return problem.prompt.replace(re, m => `「${m}」`);
+    }
+    return problem.prompt;
+  }
+
+  /**
+   * Build a quiz from one Poly chapter.
+   * @param {{chapter:number, sections?:string[], count?:number}} opts
+   * @returns {Question[]} same shape buildQuiz returns (renderable by the UI)
+   */
+  function buildPolyQuiz({ chapter, sections, count } = {}) {
+    if (!_POLY) throw new Error('[SnapEngine] Poly 문제 세트가 로드되지 않았어요.');
+    const ch = _POLY.chapters.find(c => c.chapter === chapter);
+    if (!ch) throw new Error(`[SnapEngine] Chapter ${chapter} 문제를 찾을 수 없어요.`);
+
+    const secSet = (sections && sections.length)
+      ? new Set(sections)
+      : new Set(['sentence', 'synonym', 'definition']);
+    let pool = ch.problems.filter(p => secSet.has(p.section));
+    if (pool.length === 0) throw new Error('[SnapEngine] 선택한 유형에 해당하는 문제가 없어요.');
+
+    pool = _shuffle(pool.slice());
+    const n = (count && count > 0) ? Math.min(count, pool.length) : pool.length;
+    pool = pool.slice(0, n);
+
+    return pool.map(p => {
+      const choices = _polyChoices(p, ch);
+      const answerIndex = choices.findIndex(c => _norm(c) === _norm(p.answer));
+      return {
+        id:          _newId(),
+        type:        'P',
+        badge:       `Ch.${ch.chapter} · ${POLY_SECTION_BADGE[p.section] || ''}`,
+        wordId:      p.id,     // not a real word id → recordAnswer ignores it
+        promptText:  _polyPromptText(p),
+        promptLabel: POLY_LABELS[p.section] || '알맞은 단어를 고르세요:',
+        choices,
+        answerIndex,
+        word:        { word: p.answer, meaning: p.section === 'definition' ? p.prompt : '' },
+      };
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // Public API surface
   // ---------------------------------------------------------------------------
 
@@ -1231,6 +1314,8 @@ Rules:
     verifyExtraction,
     buildQuiz,
     recordAnswer,
+    getPolyChapters,
+    buildPolyQuiz,
   };
 
   // Attach to global (window in browser, global in Node when loaded via require/import shim)
