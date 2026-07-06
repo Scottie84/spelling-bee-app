@@ -51,6 +51,20 @@
   const PRIMARY_MODEL   = VISION_MODELS[0]; // kept for backwards-compat refs
   const TIMEOUT_MS      = 60_000; // 60 s per model attempt
 
+  // Free vision models throttle a lot (429) or punt with an empty "[]". Sweep
+  // the chain several times with exponential backoff instead of one pass.
+  const EXTRACT_PASSES      = 3;
+  const EXTRACT_DEADLINE_MS = 90_000; // overall budget across retries
+  const BACKOFF_BASE_MS     = 700;
+  const _sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // transient → retry; permanent → drop this model; fatal → stop (auth error)
+  function _classifyStatus(status) {
+    if (status === 401 || status === 403) return 'fatal';
+    if (status === 429 || status === 408) return 'transient';
+    if (status && status >= 400 && status < 500) return 'permanent';
+    return 'transient'; // 5xx / timeout / network / parse / empty → retry
+  }
+
   // ---------------------------------------------------------------------------
   // Internal state
   // ---------------------------------------------------------------------------
@@ -577,67 +591,90 @@ If there are no vocabulary words in the image, return an empty array: []`;
     ];
 
     const errors = [];
+    const dead = new Set();      // models that failed permanently — skip later
+    const started = Date.now();
 
-    for (const model of VISION_MODELS) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    sweep:
+    for (let pass = 0; pass < EXTRACT_PASSES; pass++) {
+      if (dead.size === VISION_MODELS.length) break;
 
-      try {
-        const resp = await fetch(OPENROUTER_ENDPOINT, {
-          method: 'POST',
-          signal: controller.signal,
-          headers: {
-            'Content-Type':  'application/json',
-            'Authorization': `Bearer ${_apiKey}`,
-            'HTTP-Referer':  'https://snapquiz.local',
-            'X-Title':       'SnapQuiz',
-          },
-          body: JSON.stringify({
-            model,
-            max_tokens: maxTokens,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user',   content: userMessage },
-            ],
-          }),
-        });
+      for (const model of VISION_MODELS) {
+        if (dead.has(model)) continue;
+        if (Date.now() - started > EXTRACT_DEADLINE_MS) break sweep;
 
-        clearTimeout(timer);
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-        if (!resp.ok) {
-          const body = await resp.text().catch(() => '');
-          throw new Error(`HTTP ${resp.status}: ${body.slice(0, 200)}`);
+        try {
+          const resp = await fetch(OPENROUTER_ENDPOINT, {
+            method: 'POST',
+            signal: controller.signal,
+            headers: {
+              'Content-Type':  'application/json',
+              'Authorization': `Bearer ${_apiKey}`,
+              'HTTP-Referer':  'https://snapquiz.local',
+              'X-Title':       'SnapQuiz',
+            },
+            body: JSON.stringify({
+              model,
+              max_tokens: maxTokens,
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user',   content: userMessage },
+              ],
+            }),
+          });
+
+          clearTimeout(timer);
+
+          if (!resp.ok) {
+            const body = await resp.text().catch(() => '');
+            const e = new Error(`HTTP ${resp.status}: ${body.slice(0, 200)}`);
+            e.status = resp.status;
+            throw e;
+          }
+
+          const json = await resp.json();
+
+          // Defensive: some free models return an error field instead of choices
+          if (json.error) {
+            const e = new Error(`Model error: ${JSON.stringify(json.error).slice(0, 200)}`);
+            e.status = (json.error && json.error.code) || undefined;
+            throw e;
+          }
+
+          const raw = (json.choices?.[0]?.message?.content || '').trim();
+          if (!raw) throw new Error('Empty response from model');
+
+          const words = _parseWordArray(raw);
+          if (!words) throw new Error('Could not parse word array from model response');
+          // A word-list photo that parses to zero words almost always means the
+          // model punted — throttled free models often return "[]" in ~2s instead
+          // of doing the work. Treat empty as a soft failure and retry.
+          if (words.length === 0) throw new Error('Model returned no words (likely throttled)');
+
+          return { words, modelUsed: model, raw };
+
+        } catch (err) {
+          clearTimeout(timer);
+          const isAbort = err.name === 'AbortError';
+          const kind = isAbort ? 'transient' : _classifyStatus(err.status);
+          const msg  = isAbort ? 'Timeout after 60 s' : err.message;
+          console.warn(`[SnapEngine] extractWordsFromImage: ${model} (pass ${pass + 1}) failed — ${msg}`);
+          errors.push(`${model} p${pass + 1}: ${msg}`);
+
+          if (kind === 'fatal') {
+            throw new Error(`[SnapEngine] extractWordsFromImage: authentication failed — ${msg}`);
+          }
+          if (kind === 'permanent') { dead.add(model); continue; }
+          // transient — back off (exponential + jitter) before the next attempt
+          const backoff = Math.min(4000, BACKOFF_BASE_MS * Math.pow(2, pass)) + Math.floor(Math.random() * 250);
+          if (Date.now() - started + backoff < EXTRACT_DEADLINE_MS) await _sleep(backoff);
         }
-
-        const json = await resp.json();
-
-        // Defensive: some free models return an error field instead of choices
-        if (json.error) {
-          throw new Error(`Model error: ${JSON.stringify(json.error).slice(0, 200)}`);
-        }
-
-        const raw = (json.choices?.[0]?.message?.content || '').trim();
-        if (!raw) throw new Error('Empty response from model');
-
-        const words = _parseWordArray(raw);
-        if (!words) throw new Error('Could not parse word array from model response');
-        // A word-list photo that parses to zero words almost always means the
-        // model punted — throttled free models often return "[]" in ~2s instead
-        // of doing the work. Treat empty as a soft failure and fall through.
-        if (words.length === 0) throw new Error('Model returned no words (likely throttled)');
-
-        return { words, modelUsed: model, raw };
-
-      } catch (err) {
-        clearTimeout(timer);
-        const msg = err.name === 'AbortError' ? 'Timeout after 60 s' : err.message;
-        console.warn(`[SnapEngine] extractWordsFromImage: ${model} failed — ${msg}`);
-        errors.push(`${model}: ${msg}`);
-        // continue to fallback
       }
     }
 
-    throw new Error(`[SnapEngine] extractWordsFromImage: all models failed.\n${errors.join('\n')}`);
+    throw new Error(`[SnapEngine] extractWordsFromImage: all models failed after retries.\n${errors.join('\n')}`);
   }
 
   /**

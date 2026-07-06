@@ -38,6 +38,80 @@ If there are no vocabulary words in the image, return an empty array: []`;
 
 const norm = (s) => (s || '').trim().toLowerCase();
 
+// --- Retry / backoff tuning -------------------------------------------------
+// Free vision models get throttled a lot (429) or return an empty "[]" when
+// they punt. Instead of one pass over the chain, sweep it several times with
+// exponential backoff, but stay inside the 60s Vercel function budget.
+const PER_TRY_TIMEOUT_MS = 22000; // abort a single upstream call
+const GLOBAL_DEADLINE_MS = 55000; // overall budget (function maxDuration is 60s)
+const MAX_PASSES = 3;             // sweeps over the whole model chain
+const BASE_BACKOFF_MS = 600;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// How to treat a failed attempt:
+//  transient → worth retrying (rate limit, upstream 5xx, timeout, no words)
+//  permanent → this model won't work for this request; drop it, try the others
+//  fatal     → auth problem; stop everything, retrying can't help
+function classify(status) {
+  if (status === 401 || status === 403) return 'fatal';
+  if (status === 429 || status === 408) return 'transient';
+  if (status && status >= 400 && status < 500) return 'permanent';
+  return 'transient'; // 5xx, timeouts, network/parse/empty → retry
+}
+
+/** One attempt against a single model. Throws Error with .status on failure. */
+async function callOnce(model, apiKey, userMessage, maxTokens) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), PER_TRY_TIMEOUT_MS);
+  try {
+    const resp = await fetch(OPENROUTER_ENDPOINT, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        'X-Title': 'SnapQuiz',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userMessage },
+        ],
+      }),
+    });
+
+    if (!resp.ok) {
+      const t = await resp.text().catch(() => '');
+      const e = new Error(`HTTP ${resp.status}: ${t.slice(0, 200)}`);
+      e.status = resp.status;
+      throw e;
+    }
+
+    const json = await resp.json();
+    if (json.error) {
+      const e = new Error(JSON.stringify(json.error).slice(0, 200));
+      e.status = (json.error && json.error.code) || undefined;
+      throw e;
+    }
+
+    const raw = (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content || '').trim();
+    if (!raw) throw new Error('Empty response from model');
+
+    const words = parseWordArray(raw);
+    if (!words) throw new Error('Could not parse word array from model response');
+    // Empty array from a word-list photo almost always means the model punted
+    // (throttled) — treat as a transient failure so we retry / fall through.
+    if (words.length === 0) throw new Error('Model returned no words (likely throttled)');
+
+    return words;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** Robustly parse the model's text into a words array. Mirrors engine.js. */
 function parseWordArray(raw) {
   let text = raw.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
@@ -111,50 +185,52 @@ module.exports = async function handler(req, res) {
     { type: 'image_url', image_url: { url: image } },
   ];
 
+  // Sweep the model chain up to MAX_PASSES times, backing off between attempts
+  // on transient failures, until one succeeds or the time budget runs out.
+  const started = Date.now();
   const errors = [];
-  for (const model of VISION_MODELS) {
-    try {
-      const resp = await fetch(OPENROUTER_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-          'X-Title': 'SnapQuiz',
-        },
-        body: JSON.stringify({
-          model,
-          max_tokens: maxTokens,
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user', content: userMessage },
-          ],
-        }),
-      });
+  const dead = new Set(); // models that failed permanently — skip on later passes
+  let attempts = 0;
 
-      if (!resp.ok) {
-        const t = await resp.text().catch(() => '');
-        throw new Error(`HTTP ${resp.status}: ${t.slice(0, 200)}`);
+  for (let pass = 0; pass < MAX_PASSES; pass++) {
+    if (dead.size === VISION_MODELS.length) break;
+
+    for (const model of VISION_MODELS) {
+      if (dead.has(model)) continue;
+      if (Date.now() - started > GLOBAL_DEADLINE_MS) {
+        res.status(504).json({
+          error: `시간 안에 추출을 끝내지 못했어요 (${attempts}회 시도). 무료 모델이 몰려서 느린 상태예요. 잠시 후 다시 시도해 주세요.`,
+        });
+        return;
       }
 
-      const json = await resp.json();
-      if (json.error) throw new Error(JSON.stringify(json.error).slice(0, 200));
+      attempts++;
+      try {
+        const words = await callOnce(model, apiKey, userMessage, maxTokens);
+        res.status(200).json({ words, modelUsed: model, attempts });
+        return;
+      } catch (err) {
+        const kind = err.name === 'AbortError' ? 'transient' : classify(err.status);
+        errors.push(`${model} p${pass + 1}: ${err.message}`);
 
-      const raw = (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content || '').trim();
-      if (!raw) throw new Error('Empty response from model');
-
-      const words = parseWordArray(raw);
-      if (!words) throw new Error('Could not parse word array from model response');
-      // A word-list photo that parses to zero words almost always means the
-      // model punted — throttled free models often return "[]" instead of
-      // doing the work. Treat empty as a soft failure and fall through.
-      if (words.length === 0) throw new Error('Model returned no words (likely throttled)');
-
-      res.status(200).json({ words, modelUsed: model });
-      return;
-    } catch (err) {
-      errors.push(`${model}: ${err.message}`);
+        if (kind === 'fatal') {
+          res.status(502).json({
+            error: 'OpenRouter 인증 오류로 추출을 중단했어요. 서버 API 키를 확인해 주세요. ' + err.message,
+          });
+          return;
+        }
+        if (kind === 'permanent') {
+          dead.add(model);
+          continue;
+        }
+        // transient — wait (exponential backoff + jitter) before the next try
+        const backoff = Math.min(4000, BASE_BACKOFF_MS * Math.pow(2, pass)) + Math.floor(Math.random() * 250);
+        if (Date.now() - started + backoff < GLOBAL_DEADLINE_MS) await sleep(backoff);
+      }
     }
   }
 
-  res.status(502).json({ error: '모든 모델에서 추출에 실패했어요. ' + errors.join(' | ') });
+  res.status(502).json({
+    error: `모든 모델에서 추출에 실패했어요 (${attempts}회 시도). 무료 모델이 과부하 상태일 수 있어요. ` + errors.slice(-6).join(' | '),
+  });
 };
