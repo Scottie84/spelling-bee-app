@@ -477,6 +477,12 @@
       outline-offset: 2px;
     }
 
+    .settings-poly {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: var(--gap);
+    }
     .settings-danger-zone {
       border-top: 1px solid var(--border);
       padding-top: var(--gap);
@@ -1443,9 +1449,6 @@
       <button class="btn-primary teal" id="btn-start-quiz" style="font-size: var(--fs-lg); min-height: 80px;">
         ▶ 퀴즈 시작
       </button>
-      <button class="btn-primary yellow" id="btn-go-poly" style="font-size: var(--fs-lg); min-height: 72px;">
-        📗 폴리 스펠링비
-      </button>
     </div>
 
     <!-- No-words guidance -->
@@ -1471,6 +1474,11 @@
       </div>
 
       <div class="divider"></div>
+
+      <div class="settings-poly">
+        <p class="section-label">폴리 스펠링비</p>
+        <button class="btn-primary yellow" id="btn-go-poly">📗 폴리 스펠링비 시작</button>
+      </div>
 
       <div class="settings-danger-zone">
         <p class="section-label">단어장 관리</p>
@@ -1956,6 +1964,7 @@ document.getElementById('btn-start-quiz').addEventListener('click', async () => 
   showScreen('quiz-setup');
 });
 document.getElementById('btn-go-poly').addEventListener('click', () => {
+  closeSettings();
   openPolySetup();
   showScreen('poly');
 });
