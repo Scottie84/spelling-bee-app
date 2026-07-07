@@ -90,6 +90,13 @@ async function unitTests() {
             'type C blanks the target word from the example');
   else console.log('  (no type C question this run — re-run if needed)');
 
+  // Requested count is honoured even when the pool is smaller — words repeat
+  // with freshly built choices instead of the quiz coming up short.
+  const bigQuiz = await SnapEngine.buildQuiz({ scope: 'all', count: 15, types: ['A', 'B'] });
+  ok(bigQuiz.length === 15, `buildQuiz tops up to the requested count (got ${bigQuiz.length}/15)`);
+  const uniqueWordIds = new Set(bigQuiz.map(q => q.wordId));
+  ok(uniqueWordIds.size === 6, `top-up reuses all pool words (${uniqueWordIds.size}/6 unique)`);
+
   // scoring
   const w = allWords[0];
   await SnapEngine.recordAnswer(w.id, false);

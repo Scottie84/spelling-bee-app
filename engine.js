@@ -980,13 +980,9 @@ Rules:
       throw new Error(`[SnapEngine] Not enough words in the selected scope ("${scope}"). Need at least 4.`);
     }
 
-    // --- Clamp count ---
-    const n = Math.min(count, pool.length);
+    // --- First pass: one question per word, unique words first ---
+    const candidates = _shuffle([...pool]).slice(0, Math.min(count, pool.length));
 
-    // Shuffle pool and take first n words as quiz candidates
-    const candidates = _shuffle([...pool]).slice(0, n);
-
-    // --- Build one question per candidate ---
     const questions = [];
     for (const word of candidates) {
       const type = _pickType(word, types);
@@ -998,6 +994,22 @@ Rules:
 
     if (questions.length === 0) {
       throw new Error('[SnapEngine] Could not generate any questions. Check that words have meaning/example fields.');
+    }
+
+    // --- Top up to the requested count: some words can't produce a question
+    // (missing example/syn/ant, too few unique distractors) and the pool
+    // itself may be smaller than `count`. Re-ask pool words with a freshly
+    // picked type and reshuffled choices so the quiz length always matches
+    // what the user selected (bounded in case nothing more can be built).
+    const refill = _shuffle([...pool]);
+    let guard = count * 10;
+    for (let i = 0; questions.length < count && guard > 0; i++, guard--) {
+      const word = refill[i % refill.length];
+      const type = _pickType(word, types);
+      if (!type) continue;
+
+      const q = _makeQuestion(word, type, allWords);
+      if (q) questions.push(q);
     }
 
     // Shuffle final question order
