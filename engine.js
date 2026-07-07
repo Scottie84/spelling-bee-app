@@ -573,8 +573,8 @@ Return STRICT JSON ONLY — a JSON array, nothing else, no markdown fences, no p
 Each element must have exactly these fields:
   word     — the English word (lowercase, trimmed)
   pos      — part of speech abbreviation like "n." "v." "adj." "adv." "prep." (empty string if unknown)
-  meaning  — Korean meaning (한글 뜻), concise
-  example  — one short English sentence using the word
+  meaning  — the English definition exactly as printed in the image, definition text ONLY (do NOT include the example sentence, do NOT translate into Korean); if no definition is printed, write a concise English definition
+  example  — the example sentence printed in the image if there is one, otherwise one short English sentence using the word
   syn      — a synonym (English word), empty string if none
   ant      — an antonym (English word), empty string if none
 If there are no vocabulary words in the image, return an empty array: []`;
