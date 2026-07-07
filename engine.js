@@ -365,7 +365,10 @@
     for (const w of words) {
       counts.set(w.group, (counts.get(w.group) || 0) + 1);
     }
-    return Array.from(counts.entries()).map(([name, count]) => ({ name, count }));
+    // Natural sort so "Chapter 2" comes before "Chapter 10" (and Ch.13 < Ch.14).
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
   }
 
   // ---------------------------------------------------------------------------
