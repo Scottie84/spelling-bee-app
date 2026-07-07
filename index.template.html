@@ -1298,6 +1298,11 @@
       display: block;
       margin-bottom: var(--gap);
     }
+    .result-hero .result-emoji .result-bee {
+      height: 96px;
+      width: auto;
+      margin: 0 auto;
+    }
     .result-hero h2 {
       font-size: var(--fs-xl);
       font-weight: 900;
@@ -1847,6 +1852,19 @@
 ============================================================ -->
 <script>
 'use strict';
+
+/* =============================================================
+   BEE MASCOT — single source: the home-logo art. Every bee shown
+   anywhere in the app (result screen, favicon) reuses this image.
+============================================================= */
+const BEE_IMG = document.querySelector('.logo-bee')?.src || '';
+if (BEE_IMG) {
+  const fav = document.createElement('link');
+  fav.rel = 'icon';
+  fav.type = 'image/png';
+  fav.href = BEE_IMG;
+  document.head.appendChild(fav);
+}
 
 /* =============================================================
    STATE
@@ -3148,7 +3166,7 @@ const PRAISE = [
   { min:80,  emoji:'🌟', text:'정말 잘했어요!' },
   { min:60,  emoji:'😊', text:'잘했어요! 조금만 더!' },
   { min:40,  emoji:'💪', text:'다시 한번 해봐요!' },
-  { min:0,   emoji:'🐝', text:'괜찮아요! 계속 도전해요!' },
+  { min:0,   bee:true,  text:'괜찮아요! 계속 도전해요!' },
 ];
 
 function showResult() {
@@ -3157,8 +3175,13 @@ function showResult() {
   const pct     = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   const praise = PRAISE.find(p => pct >= p.min);
-  document.getElementById('result-emoji').textContent  = praise.emoji;
-  document.getElementById('result-emoji').setAttribute('aria-label', praise.emoji + ' ' + praise.text);
+  const resultEmojiEl = document.getElementById('result-emoji');
+  if (praise.bee) {
+    resultEmojiEl.innerHTML = `<img class="result-bee" src="${BEE_IMG}" alt="">`;
+  } else {
+    resultEmojiEl.textContent = praise.emoji;
+  }
+  resultEmojiEl.setAttribute('aria-label', praise.text);
   document.getElementById('result-praise').textContent = praise.text;
   document.getElementById('result-score').textContent  = `${correct} / ${total}`;
   document.getElementById('result-score-sub').textContent = `정답률 ${pct}%`;
