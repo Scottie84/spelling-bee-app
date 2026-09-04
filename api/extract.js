@@ -15,11 +15,12 @@
 const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 // Tried in order. Free vision models are heavily rate-limited (429), so we keep
 // several working fallbacks. Keep in sync with engine.js (VISION_MODELS).
-// nemotron is a dedicated vision model and the most reliable free one; the
-// Gemma "free" models are frequently 429-throttled upstream, so they sit
-// behind it as higher-quality-but-flaky fallbacks.
+// minimax and dots-3 are the free vision models that currently answer
+// reliably; the Gemma "free" models share an upstream pool that is 429 most
+// of the day, so they sit behind them as last-resort fallbacks.
 const VISION_MODELS = [
-  'nvidia/nemotron-nano-12b-v2-vl:free',
+  'minimax/minimax-m3:free',
+  'dots-studio/dots-3-note-preview:free',
   'google/gemma-4-31b-it:free',
   'google/gemma-4-26b-a4b-it:free',
 ];
@@ -76,6 +77,9 @@ async function callOnce(model, apiKey, userMessage, maxTokens) {
       body: JSON.stringify({
         model,
         max_tokens: maxTokens,
+        // Some of these are reasoning models: left on, they burn the whole
+        // token budget thinking and return an empty message.
+        reasoning: { enabled: false },
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: userMessage },
@@ -170,7 +174,7 @@ module.exports = async function handler(req, res) {
     try { body = JSON.parse(body); } catch (_) { body = {}; }
   }
   const image = body && body.image;
-  const maxTokens = (body && body.maxTokens) || 1200;
+  const maxTokens = (body && body.maxTokens) || 2200;
 
   if (!image || typeof image !== 'string') {
     res.status(400).json({ error: 'image 필드(데이터 URI 또는 base64)가 필요해요.' });

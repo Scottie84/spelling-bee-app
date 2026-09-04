@@ -16,7 +16,8 @@
 const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 // Keep in sync with engine.js (VISION_MODELS).
 const VISION_MODELS = [
-  'nvidia/nemotron-nano-12b-v2-vl:free',
+  'minimax/minimax-m3:free',
+  'dots-studio/dots-3-note-preview:free',
   'google/gemma-4-31b-it:free',
   'google/gemma-4-26b-a4b-it:free',
 ];
@@ -138,6 +139,7 @@ module.exports = async function handler(req, res) {
         body: JSON.stringify({
           model,
           max_tokens: maxTokens,
+          reasoning: { enabled: false },
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
             { role: 'user', content: userMessage },

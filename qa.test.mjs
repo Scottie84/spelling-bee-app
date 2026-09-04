@@ -117,6 +117,8 @@ async function finishQuiz(page) {
     const choiceBtns = await page.$$('.choice-btn:not(:disabled)');
     if (choiceBtns.length > 0) {
       await choiceBtns[0].click();
+      await page.waitForTimeout(100);
+      await page.click('#btn-check-answer');
       await page.waitForTimeout(200);
     }
 
@@ -254,11 +256,7 @@ async function testPhotoAdd(browser) {
 
   // Trigger file-input change with a synthetic file
   const imgPath = path.join(__dirname, 'test_vocab.png');
-  const [fileChooser] = await Promise.all([
-    page.waitForEvent('filechooser'),
-    page.click('#file-input'),
-  ]);
-  await fileChooser.setFiles(imgPath);
+  await page.setInputFiles('#file-input-gallery', imgPath);
 
   // Wait for confirm screen
   await page.waitForSelector('#screen-confirm.active', { timeout: 8000 });
@@ -302,11 +300,7 @@ async function testConfirmEdit(browser) {
   await page.waitForSelector('#screen-add.active', { timeout: 3000 });
   await mockExtraction(page, mockWords);
 
-  const [fileChooser] = await Promise.all([
-    page.waitForEvent('filechooser'),
-    page.click('#file-input'),
-  ]);
-  await fileChooser.setFiles(path.join(__dirname, 'test_vocab.png'));
+  await page.setInputFiles('#file-input-gallery', path.join(__dirname, 'test_vocab.png'));
   await page.waitForSelector('#screen-confirm.active', { timeout: 8000 });
 
   // 4a: Edit a word's meaning
@@ -355,11 +349,7 @@ async function testConfirmEdit(browser) {
   await page.click('#btn-add-photo');
   await page.waitForSelector('#screen-add.active', { timeout: 3000 });
   await mockExtraction(page, [{ word: 'test', pos: 'n.', meaning: '테스트', example: '', syn: '', ant: '' }]);
-  const [fc2] = await Promise.all([
-    page.waitForEvent('filechooser'),
-    page.click('#file-input'),
-  ]);
-  await fc2.setFiles(path.join(__dirname, 'test_vocab.png'));
+  await page.setInputFiles('#file-input-gallery', path.join(__dirname, 'test_vocab.png'));
   await page.waitForSelector('#screen-confirm.active', { timeout: 8000 });
 
   // Clear the group name
@@ -411,8 +401,13 @@ async function testWordbook(browser) {
   const chipCount = await page.$$eval('#group-chips .chip', els => els.length);
   ok('Group chips rendered (전체 + at least 2 groups)', chipCount >= 3, `got ${chipCount} chips`);
 
-  // Filter by TestGroup — second chip (re-fetch after each click to avoid stale handles)
-  await page.click('#group-chips .chip:nth-child(2)');
+  // Filter by TestGroup — chips are chapter-sorted, so match on the label
+  await page.evaluate(() => {
+    const chip = [...document.querySelectorAll('#group-chips .chip')]
+      .find(c => c.textContent.trim().startsWith('TestGroup'));
+    if (!chip) throw new Error('TestGroup chip not found');
+    chip.click();
+  });
   await page.waitForTimeout(400);
   const filteredItems = await page.$$('.word-item');
   ok('Group filter reduces word list', filteredItems.length === SEED_WORDS.length,
@@ -631,8 +626,10 @@ async function testQuizPlay(browser) {
     const widthPct = parseFloat(progressWidth);
     ok(`Q${qi + 1}: progress bar fill > 0%`, widthPct > 0, `width=${progressWidth}`);
 
-    // Click first choice
+    // Pick the first choice, then confirm it (two-step grading)
     await choiceBtns[0].click();
+    await page.waitForTimeout(100);
+    await page.click('#btn-check-answer');
     await page.waitForTimeout(300);
 
     // Feedback should appear
@@ -785,8 +782,9 @@ async function testResultScreen(browser) {
   const praiseText = await page.$eval('#result-praise', el => el.textContent);
   ok('Praise text displayed', praiseText.length > 0, `got "${praiseText}"`);
 
-  const resultEmoji = await page.$eval('#result-emoji', el => el.textContent);
-  ok('Result emoji displayed', resultEmoji.length > 0);
+  const resultEmoji = await page.$eval('#result-emoji',
+    el => el.textContent.trim() || (el.querySelector('img') ? '<bee>' : ''));
+  ok('Result emoji (or bee image) displayed', resultEmoji.length > 0);
 
   const scoreSub = await page.$eval('#result-score-sub', el => el.textContent);
   ok('Score percentage displayed', scoreSub.includes('%'), `got "${scoreSub}"`);
@@ -930,11 +928,7 @@ async function testEdgeCases(browser) {
     };
   });
 
-  const [fileChooser] = await Promise.all([
-    page.waitForEvent('filechooser'),
-    page.click('#file-input'),
-  ]);
-  await fileChooser.setFiles(path.join(__dirname, 'test_vocab.png'));
+  await page.setInputFiles('#file-input-gallery', path.join(__dirname, 'test_vocab.png'));
 
   // Wait for error state
   await page.waitForSelector('#extract-error:not(.hidden)', { timeout: 8000 });
@@ -945,8 +939,8 @@ async function testEdgeCases(browser) {
   const errMsg = await page.$eval('#extract-error-msg', el => el.textContent);
   ok('Error message shows failure reason', errMsg.length > 0, `got "${errMsg}"`);
 
-  const dropAreaVisible = await page.$eval('#photo-drop-area', el => !el.classList.contains('hidden'));
-  ok('Drop area restored after extraction failure', dropAreaVisible);
+  const optionsVisible = await page.$eval('#add-options', el => !el.classList.contains('hidden'));
+  ok('Add options restored after extraction failure', optionsVisible);
 
   const retryBtn = await page.$('#btn-retry-extract');
   ok('Retry button is present after extraction error', !!retryBtn);
@@ -1080,8 +1074,11 @@ async function testKidUXAndA11y(browser) {
   await page.click('#btn-start-quiz-go');
   await page.waitForSelector('#screen-quiz.active', { timeout: 5000 });
 
-  // Tab to first choice and press Enter
+  // Tab to first choice and press Enter, then confirm with the keyboard
   await page.focus('.choice-btn');
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(200);
+  await page.focus('#btn-check-answer');
   await page.keyboard.press('Enter');
   await page.waitForTimeout(400);
 
@@ -1105,12 +1102,14 @@ async function testKidUXAndA11y(browser) {
   const keyInVisibleText = /sk-or/.test(bodyText);
   ok('API key not in visible body text', !keyInVisibleText);
 
-  // 12g: No external network requests other than OpenRouter (on file:// page)
+  // 12g: No external network requests other than OpenRouter and Supabase
+  // (Supabase is the primary storage backend) on a file:// page
   const externalRequests = [];
   context.on('request', req => {
     const url = req.url();
     if (!url.startsWith('file://') &&
         !url.includes('openrouter.ai') &&
+        !url.includes('supabase.co') &&
         !url.startsWith('data:') &&
         !url.startsWith('blob:')) {
       externalRequests.push(url);
@@ -1119,7 +1118,7 @@ async function testKidUXAndA11y(browser) {
 
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(1000);
-  ok('No external network requests on page load (besides OpenRouter)',
+  ok('No external network requests on page load (besides OpenRouter/Supabase)',
     externalRequests.length === 0,
     `external: ${externalRequests.join(', ')}`);
 
@@ -1230,7 +1229,7 @@ async function testLiveExtraction(browser) {
   const imgB64 = imgData.toString('base64');
   const dataUrl = `data:image/png;base64,${imgB64}`;
 
-  console.log('  Calling real OpenRouter API (primary: nvidia/nemotron-nano-12b-v2-vl:free)...');
+  console.log('  Calling real OpenRouter API (primary: minimax/minimax-m3:free)...');
   const start = Date.now();
 
   const result = await page.evaluate(async (dataUrl) => {

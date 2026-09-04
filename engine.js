@@ -40,11 +40,12 @@
   // Tried in order. Free vision models are heavily rate-limited (429), so we
   // keep several working fallbacks — if the first is throttled we try the next.
   // NOTE: keep this list in sync with api/extract.js (VISION_MODELS).
-  // nemotron is a dedicated vision model and the most reliable free one;
-  // the Gemma "free" models are frequently 429-throttled upstream, so they
-  // sit behind it as higher-quality-but-flaky fallbacks.
+  // minimax and dots-3 are the free vision models that currently answer
+  // reliably; the Gemma "free" models share an upstream pool that is 429
+  // most of the day, so they sit behind them as last-resort fallbacks.
   const VISION_MODELS = [
-    'nvidia/nemotron-nano-12b-v2-vl:free',
+    'minimax/minimax-m3:free',
+    'dots-studio/dots-3-note-preview:free',
     'google/gemma-4-31b-it:free',
     'google/gemma-4-26b-a4b-it:free',
   ];
@@ -551,11 +552,11 @@
    * @param {string} dataUrlOrBase64
    *   Either a full data URI ("data:image/png;base64,...") or raw base64.
    * @param {object} [opts]
-   *   opts.maxTokens  — override token cap (default 1200)
+   *   opts.maxTokens  — override token cap (default 2200)
    * @returns {Promise<{words: PartialWord[], modelUsed: string, raw?: string}>}
    */
   async function extractWordsFromImage(dataUrlOrBase64, opts = {}) {
-    const maxTokens = opts.maxTokens || 1200;
+    const maxTokens = opts.maxTokens || 2200;
 
     // Normalise to a proper data URI so the model gets a valid image_url
     let imageUrl = dataUrlOrBase64;
@@ -621,6 +622,9 @@ If there are no vocabulary words in the image, return an empty array: []`;
             body: JSON.stringify({
               model,
               max_tokens: maxTokens,
+              // Some of these are reasoning models: left on, they burn the
+              // whole token budget thinking and return an empty message.
+              reasoning: { enabled: false },
               messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user',   content: userMessage },
@@ -834,6 +838,7 @@ Rules:
           body: JSON.stringify({
             model,
             max_tokens: maxTokens,
+            reasoning: { enabled: false },
             messages: [
               { role: 'system', content: VERIFY_SYSTEM_PROMPT },
               { role: 'user',   content: userMessage },
